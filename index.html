@@ -70,7 +70,8 @@ button{cursor:pointer}
 .tab{border:none;background:transparent;padding:.55rem 1.1rem;border-radius:10px;font-weight:800;font-size:1rem;min-height:2.6rem;color:var(--muted)}
 .tab.active{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
 .toolbar{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center;padding:.7rem 1.2rem;border-bottom:2px solid var(--line);background:#faf8f3}
-.toolbar .sep{width:2px;height:2rem;background:var(--line);margin:0 .2rem}
+.toolbar .sep{width:2px;height:2rem;background:var(--line);margin:0 .1rem}
+.toolbar .btn{padding:.5rem .8rem}
 .editor{flex:1;display:flex;min-height:0}
 .side{width:clamp(15rem,22vw,26rem);flex-shrink:0;background:var(--panel);border-right:2px solid var(--line);display:flex;flex-direction:column;min-height:0}
 .side-head{padding:1rem;border-bottom:2px solid var(--line);display:flex;flex-direction:column;gap:.6rem}
@@ -107,6 +108,17 @@ button{cursor:pointer}
 .seat .nm{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .seat .flag{position:absolute;top:4%;right:5%;font-size:.7em;opacity:.9}
 .seat.dragging{opacity:.35}
+.seat.locked{background:#e8eef7;border-color:#9fb4d3}
+.lockmode .seat.filled{cursor:pointer}
+.lockmode .seat.empty{opacity:.5}
+.seat .flag{font-size:max(.55em,12px)}
+.print-head{display:none}
+.vopts{display:flex;flex-direction:column;gap:.7rem}
+.vopt{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--bg);border-radius:14px;padding:.6rem .6rem .6rem 1rem}
+.vopt b{display:block}.vopt small{color:var(--muted);font-size:.9rem}
+.seg{display:flex;background:#fff;border:2px solid var(--line);border-radius:12px;padding:3px;gap:3px;flex-shrink:0}
+.seg button{border:none;background:transparent;border-radius:9px;padding:.45rem .9rem;font-weight:800;min-height:2.5rem;color:var(--muted)}
+.seg button.on{background:var(--accent);color:#fff}
 .seat.pop{animation:deal .35s both}
 @keyframes deal{from{transform:scale(.6) translateY(-12px);opacity:0}}
 .hint{color:var(--muted);text-align:center;font-size:.95rem}
@@ -169,7 +181,7 @@ textarea.input{min-height:11rem;resize:vertical;width:100%;line-height:1.4}
 .classlist .row .btn{min-height:2.6rem;width:2.6rem;padding:0}
 .classlist .row .input{min-height:2.6rem}
 
-.toast{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.8rem 1.4rem;border-radius:14px;font-weight:700;z-index:900;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:pop .2s;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;top:1rem;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.8rem 1.4rem;border-radius:14px;font-weight:700;z-index:900;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:pop .2s;max-width:90vw;text-align:center}
 
 @media (max-width: 760px){
   .editor{flex-direction:column}
@@ -186,6 +198,11 @@ textarea.input{min-height:11rem;resize:vertical;width:100%;line-height:1.4}
   .seat{border-color:#999!important;background:#fff!important}
   .seat.off{border:none!important}
   .front{background:#fff;color:#000;border:2px solid #000}
+  .topbar{display:none!important}
+  .print-head{display:flex!important;justify-content:space-between;align-items:baseline;font-size:20pt;font-weight:800;margin-bottom:10px}
+  .print-head small{font-size:12pt;font-weight:600;color:#555}
+  .seat.locked{background:#fff!important}
+  .seat .flag{display:none}
 }
 </style>
 </head>
@@ -208,7 +225,7 @@ const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(3
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- App state ---------- */
-const state = { anim:false, view:"home", planId:null, tab:"seats", selected:null, editRoom:false, flipped:false, undo:[] };
+const state = { lockMode:false, anim:false, view:"home", planId:null, tab:"seats", selected:null, editRoom:false, flipped:false, undo:[] };
 const plan = () => store.plans.find(p => p.id === state.planId);
 function touch(p){ p.updated = Date.now(); save(); }
 
@@ -220,6 +237,8 @@ function newPlan(name, rows, cols, students){
 /* ---------- Helpers ---------- */
 function seatOf(p, sid){ for(const k in p.seats) if(p.seats[k] === sid) return +k; return null; }
 function nameOf(p, sid){ const s = p.students.find(s => s.id === sid); return s ? s.name : "?"; }
+function shortName(n){ const w = n.trim().split(/\s+/); return w.length>1 ? w[0]+" "+w[w.length-1][0].toUpperCase()+"." : n; }
+function deskName(p, sid){ const n = nameOf(p,sid); return p.short ? shortName(n) : n; }
 function seatOrder(p){ // front row first, left to right
   const out = []; for(let r=0;r<p.rows;r++) for(let c=0;c<p.cols;c++){ const i=r*p.cols+c; if(!p.off.includes(i)) out.push(i); } return out;
 }
@@ -229,6 +248,7 @@ function cleanSeats(p){ // drop seats pointing at deleted students / off cells /
   const ok = r => ids.has(r[0]) && ids.has(r[1]);
   p.together = p.together.filter(ok); p.apart = p.apart.filter(ok);
   p.front = p.front.filter(id => ids.has(id));
+  p.locked = (p.locked||[]).filter(i => p.seats[i] != null);
 }
 function pushUndo(p){ state.undo.push(JSON.stringify(p.seats)); if(state.undo.length>50) state.undo.shift(); }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -285,9 +305,12 @@ function parseNames(text){
 /* ---------- Arranging ---------- */
 function randomArrange(p){
   pushUndo(p);
-  const order = seatOrder(p);
-  const ids = shuffle(p.students.map(s=>s.id));
-  p.seats = {};
+  cleanSeats(p);
+  const keep = {}; for(const i of p.locked) keep[i] = p.seats[i];
+  const fixed = new Set(Object.values(keep));
+  const order = seatOrder(p).filter(i => keep[i]==null);
+  const ids = shuffle(p.students.map(s=>s.id).filter(id => !fixed.has(id)));
+  p.seats = {...keep};
   ids.slice(0, order.length).forEach((id,i) => p.seats[order[i]] = id);
   touch(p);
   const left = ids.length - order.length;
@@ -310,9 +333,11 @@ function ruleStatus(p){
   return {t,ap,f,met:all.filter(Boolean).length,total:all.length,seated:pos};
 }
 function smartArrange(p){
-  const order = seatOrder(p);
-  const ids = p.students.map(s=>s.id);
-  if(!ids.length){ toast("Add some students first"); return; }
+  if(!p.students.length){ toast("Add some students first"); return; }
+  cleanSeats(p);
+  const keep = new Map(); for(const i of p.locked) keep.set(p.seats[i], i);
+  const order = seatOrder(p).filter(i => !p.locked.includes(i));
+  const ids = p.students.map(s=>s.id).filter(id => !keep.has(id));
   pushUndo(p);
   const n = Math.min(ids.length, order.length);
   let best=null, bestScore=-Infinity;
@@ -320,9 +345,10 @@ function smartArrange(p){
   for(let run=0; run<60 && performance.now()-t0 < 700; run++){
     const perm = shuffle(ids.slice());
     // seats used: first n of order; perm[0..n-1] seated, rest unseated
-    const pos = new Map(); perm.forEach((id,i) => pos.set(id, i<n ? order[i] : null));
+    const pos = new Map(keep); perm.forEach((id,i) => pos.set(id, i<n ? order[i] : null));
     let sc = scoreLayout(p,pos);
     for(let it=0; it<3000; it++){
+      if(!n) break;
       const i=Math.floor(Math.random()*perm.length), j=Math.floor(Math.random()*n);
       if(i===j) continue;
       const a=perm[i], b=perm[j];
@@ -335,11 +361,12 @@ function smartArrange(p){
     if(sc > bestScore){ bestScore=sc; best=new Map(pos); }
   }
   p.seats = {};
+  if(!best) best = new Map(keep);
   for(const [id,seat] of best) if(seat!=null) p.seats[seat]=id;
   touch(p);
   const st = ruleStatus(p);
   if(st.total===0) toast("Shuffled! (No requirements set yet)");
-  else if(st.met===st.total) toast(`All ${st.total} requirements met ✓`);
+  else if(st.met===st.total) toast(st.total===1 ? "Requirement met ✓" : `All ${st.total} requirements met ✓`);
   else toast(`${st.met} of ${st.total} requirements met – the rest weren't possible`);
 }
 
@@ -410,11 +437,11 @@ function seatsView(p, waiting, st){
   const cells=[];
   const idxs=[]; for(let r=0;r<p.rows;r++) for(let c=0;c<p.cols;c++) idxs.push(r*p.cols+c);
   if(state.flipped) idxs.reverse();
-  const frontIds = new Set(p.front);
+  const locked = new Set(p.locked);
   for(const i of idxs){
     const off = p.off.includes(i), sid = p.seats[i];
     if(off) cells.push(`<div class="seat off" data-seat="${i}"></div>`);
-    else if(sid) cells.push(`<div class="seat filled ${state.selected===sid?"sel":""} ${state.anim?"pop":""}" style="${state.anim?`animation-delay:${(seatOrder(p).indexOf(i)*18)}ms`:""}" data-seat="${i}" data-sid="${sid}"><span class="nm">${esc(nameOf(p,sid))}</span></div>`);
+    else if(sid) cells.push(`<div class="seat filled ${locked.has(i)?"locked":""} ${state.selected===sid?"sel":""} ${state.anim?"pop":""}" style="${state.anim?`animation-delay:${(seatOrder(p).indexOf(i)*18)}ms`:""}" data-seat="${i}" data-sid="${sid}"><span class="nm">${esc(deskName(p,sid))}</span>${locked.has(i)?`<span class="flag">🔒</span>`:""}</div>`);
     else cells.push(`<div class="seat empty ${state.selected?"target":""}" data-seat="${i}"></div>`);
   }
   const nSeats = seatOrder(p).length;
@@ -426,9 +453,10 @@ function seatsView(p, waiting, st){
     <button class="btn" data-act="undo" ${state.undo.length?"":"disabled"}><span class="ico">↶</span>Undo</button>
     <button class="btn" data-act="clear"><span class="ico">⟲</span>Clear seats</button>
     <span class="sep"></span>
-    <button class="btn ${state.editRoom?"on":""}" data-act="editroom"><span class="ico">▦</span>${state.editRoom?"Done editing room":"Edit room"}</button>
-    <button class="btn" data-act="flip" title="Swap between teacher's view and students' view"><span class="ico">⇅</span>${state.flipped?"Board at top":"Board at bottom"}</button>
-    <button class="btn" data-act="print"><span class="ico">🖨</span>Print</button>
+    <button class="btn ${state.editRoom?"on":""}" data-act="editroom"><span class="ico">▦</span>${state.editRoom?"Done editing":"Edit room"}</button>
+    <button class="btn ${state.lockMode?"on":""}" data-act="lockmode" title="Lock students to their desks so shuffling leaves them there"><span class="ico">🔒</span>${state.lockMode?"Done locking":"Lock desks"}</button>
+    <span class="spacer"></span>
+    <button class="btn" data-act="view"><span class="ico">⚙</span>View</button>
     <button class="btn" data-act="full" title="Full screen"><span class="ico">⛶</span>${document.fullscreenElement?"Exit full screen":"Full screen"}</button>
   </div>
   <div class="editor">
@@ -450,14 +478,16 @@ function seatsView(p, waiting, st){
       </div>
     </aside>
     <section class="stage">
+      <div class="print-head">${esc(p.name)} <small>${new Date().toLocaleDateString([], {weekday:"long",day:"numeric",month:"long",year:"numeric"})}</small></div>
       ${state.editRoom ? `<div class="banner">Tap squares to add or remove desks. Gaps make aisles. Change the size: <button class="btn" data-act="resize" style="min-height:2.4rem;margin-left:.4rem">Room size ${p.rows}×${p.cols}</button></div>` : ""}
       <div class="room ${state.flipped?"flipped":""}">
         <div class="front">Front of class · Board</div>
         <div class="gridwrap" id="gridwrap">
-          <div class="grid ${state.editRoom?"editroom":""}" id="grid" style="grid-template-columns:repeat(${p.cols},auto)">${cells.join("")}</div>
+          <div class="grid ${state.editRoom?"editroom":""} ${state.lockMode?"lockmode":""}" id="grid" style="grid-template-columns:repeat(${p.cols},auto)">${cells.join("")}</div>
         </div>
       </div>
-      ${!state.editRoom ? `<div class="hint">${state.selected ? `Now tap a desk to seat <b>${esc(nameOf(p,state.selected))}</b> (or tap them again to cancel)` : "Drag names onto desks — or tap a name, then tap a desk. Drop on a filled desk to swap."}</div>` : ""}
+      ${state.lockMode ? `<div class="banner">Tap a student's desk to lock or unlock it. Locked students stay put when you shuffle.</div>` : ""}
+      ${!state.editRoom && !state.lockMode ? `<div class="hint">${state.selected ? `Now tap a desk to seat <b>${esc(nameOf(p,state.selected))}</b> (or tap them again to cancel)` : "Drag names onto desks — or tap a name, then tap a desk. Drop on a filled desk to swap."}</div>` : ""}
     </section>
   </div>`;
 }
@@ -630,11 +660,37 @@ function classListModal(){
   });
 }
 
+function viewModal(){
+  const p=plan();
+  modal(`<h2>View</h2>
+    <div class="vopts">
+      <div class="vopt"><div><b>Names on desks</b><small>Short names fit better on small desks</small></div>
+        <div class="seg"><button data-v="full" class="${p.short?"":"on"}">Amelia Jones</button><button data-v="short" class="${p.short?"on":""}">Amelia J.</button></div></div>
+      <div class="vopt"><div><b>Board position</b><small>Bottom = how you see it from the front</small></div>
+        <div class="seg"><button data-v="top" class="${state.flipped?"":"on"}">Top</button><button data-v="bottom" class="${state.flipped?"on":""}">Bottom</button></div></div>
+      <div class="vopt"><div><b>Print or save as PDF</b><small>Prints the room with the class name and date</small></div>
+        <button class="btn" data-v="print">🖨 Print</button></div>
+    </div>
+    <div class="foot"><button class="btn primary" data-close>Done</button></div>`,
+  (m,close)=>{
+    m.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{
+      const v=b.dataset.v;
+      if(v==="print"){ close(); setTimeout(()=>window.print(),100); return; }
+      if(v==="full"||v==="short"){ p.short = v==="short"; touch(p); }
+      if(v==="top"||v==="bottom") state.flipped = v==="bottom";
+      b.parentNode.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b));
+      render();
+    });
+  });
+}
+
 /* ---------- Actions ---------- */
 function openPlan(id){ state.view="editor"; state.planId=id; state.tab="seats"; state.selected=null; state.editRoom=false; state.undo=[]; render(); }
 
 function place(p, sid, seat){
   if(p.off.includes(seat)) return;
+  const lk = p.locked||[];
+  if(lk.includes(seatOf(p,sid)) || (p.seats[seat] && p.seats[seat]!==sid && lk.includes(seat))){ toast("That desk is locked 🔒 — use Lock desks to unlock it"); return; }
   pushUndo(p);
   const cur=seatOf(p,sid), occ=p.seats[seat];
   if(occ===sid) { state.undo.pop(); return; }
@@ -643,7 +699,7 @@ function place(p, sid, seat){
   p.seats[seat]=sid;
   touch(p);
 }
-function unseat(p, sid){ const cur=seatOf(p,sid); if(cur!=null){ pushUndo(p); delete p.seats[cur]; touch(p); } }
+function unseat(p, sid){ const cur=seatOf(p,sid); if(cur!=null && (p.locked||[]).includes(cur)){ toast("That desk is locked 🔒"); return; } if(cur!=null){ pushUndo(p); delete p.seats[cur]; touch(p); } }
 
 app.addEventListener("click", e=>{
   if(justDragged){ justDragged=false; return; }
@@ -686,8 +742,10 @@ app.addEventListener("click", e=>{
         smartArrange(p); state.anim=true; render(); break;
       case "smartgo": smartArrange(p); if(p.students.length){ state.tab="seats"; state.anim=true; } render(); break;
       case "undo": if(state.undo.length){ p.seats=JSON.parse(state.undo.pop()); touch(p); render(); } break;
-      case "clear": if(!Object.keys(p.seats).length) return toast("No one is seated yet"); pushUndo(p); p.seats={}; touch(p); render(); toast("Everyone's back in the list (Undo to bring them back)"); break;
-      case "editroom": state.editRoom=!state.editRoom; state.selected=null; render(); break;
+      case "clear": if(!Object.keys(p.seats).length) return toast("No one is seated yet"); pushUndo(p); { const k={}; for(const i of p.locked) k[i]=p.seats[i]; p.seats=k; } touch(p); render(); toast("Everyone's back in the list (Undo to bring them back)"); break;
+      case "editroom": state.editRoom=!state.editRoom; state.lockMode=false; state.selected=null; render(); break;
+      case "lockmode": state.lockMode=!state.lockMode; state.editRoom=false; state.selected=null; render(); break;
+      case "view": viewModal(); break;
       case "flip": state.flipped=!state.flipped; render(); break;
       case "print": window.print(); break;
       case "full": try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }catch(e){} break;
@@ -716,6 +774,11 @@ app.addEventListener("click", e=>{
     }
     if(t.classList.contains("off")) return;
     const sid=p.seats[i];
+    if(state.lockMode){
+      if(!sid) return toast("Only desks with a student can be locked");
+      const k=p.locked.indexOf(i); if(k>=0) p.locked.splice(k,1); else p.locked.push(i);
+      touch(p); render(); return;
+    }
     if(state.selected){
       if(state.selected===sid){ state.selected=null; }
       else { place(p,state.selected,i); state.selected=null; }
@@ -749,7 +812,7 @@ app.addEventListener("paste", e=>{ // pasting several lines into the add box ope
 /* ---------- Drag & drop (mouse, touch, pen) ---------- */
 let drag=null, justDragged=false;
 app.addEventListener("pointerdown", e=>{
-  if(state.view!=="editor" || state.editRoom || e.button>0) return;
+  if(state.view!=="editor" || state.editRoom || state.lockMode || e.button>0) return;
   const el=e.target.closest("[data-sid]"); if(!el) return;
   drag={sid:el.dataset.sid, el, x:e.clientX, y:e.clientY, started:false, ghost:null, hot:null};
 });
