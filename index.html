@@ -1,1 +1,802 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Seating Plans</title></head><body><h1>Seating Plans — coming in a few minutes</h1></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seating Plans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ea; --panel:#ffffff; --ink:#1f2a30; --muted:#6b7780; --line:#e2ddd2;
+  --accent:#2f7d6d; --accent-ink:#fff; --accent-soft:#e3f1ed;
+  --seat:#fbfaf6; --seat-line:#d8d2c4; --chip:#fff3d6; --chip-line:#ecd49a;
+  --danger:#c2483d; --danger-soft:#fbe7e4; --warn:#b7791f;
+  --front:#34444d;
+  --radius:16px; --shadow:0 2px 10px rgba(30,40,40,.08);
+}
+*{box-sizing:border-box}
+html{font-size:clamp(16px, 0.55rem + 0.75vw, 28px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:500;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:flex;flex-direction:column}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:2.9rem;padding:.55rem 1.1rem;border-radius:12px;border:2px solid var(--line);background:var(--panel);font-weight:700;font-size:1rem;line-height:1.1;transition:transform .08s, background .15s, border-color .15s;white-space:nowrap}
+.btn:hover{border-color:#c9c2b2}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--danger);border-color:#efc9c4;background:var(--danger-soft)}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:rgba(0,0,0,.05)}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.btn .ico{font-size:1.15em;line-height:1}
+.iconbtn{width:2.9rem;padding:0}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;gap:.75rem;padding:.8rem 1.2rem;background:var(--panel);border-bottom:2px solid var(--line);flex-wrap:wrap}
+.brand{font-weight:800;font-size:1.35rem;display:flex;align-items:center;gap:.5rem}
+.brand .logo{width:1.8rem;height:1.8rem;border-radius:8px;background:var(--accent);display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:5px}
+.brand .logo i{background:#fff;border-radius:2px;opacity:.9}
+.spacer{flex:1}
+.plan-title{font-weight:800;font-size:1.3rem;border:2px solid transparent;border-radius:10px;padding:.3rem .5rem;background:transparent;min-width:6ch;max-width:40vw}
+.plan-title:hover{border-color:var(--line)}
+.plan-title:focus{outline:none;border-color:var(--accent);background:#fff}
+
+/* Home */
+.home{padding:2rem clamp(1rem,4vw,4rem);max-width:1500px;width:100%;margin:0 auto}
+.home h1{font-size:2rem;margin:.2rem 0 .3rem;font-weight:800}
+.home .sub{color:var(--muted);margin:0 0 1.6rem;font-size:1.1rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:1.2rem}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:var(--radius);padding:1rem;display:flex;flex-direction:column;gap:.7rem;box-shadow:var(--shadow);cursor:pointer;transition:transform .12s,border-color .12s}
+.card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.card.new{align-items:center;justify-content:center;border-style:dashed;background:transparent;box-shadow:none;min-height:14rem;color:var(--accent);font-weight:800;font-size:1.2rem}
+.card.new .plus{font-size:3rem;line-height:1}
+.card h3{margin:0;font-size:1.25rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .meta{color:var(--muted);font-size:.9rem}
+.card .actions{display:flex;gap:.4rem;margin-top:auto}
+.card .actions .btn{min-height:2.5rem;padding:.3rem .7rem;font-size:.9rem}
+.mini{background:var(--bg);border-radius:10px;padding:.6rem;display:grid;gap:3px;aspect-ratio:16/10}
+.mini i{border-radius:2px;background:#ddd6c8}
+.mini i.f{background:var(--accent)}
+.mini i.x{background:transparent}
+.home-foot{margin-top:2.5rem;display:flex;gap:.6rem;flex-wrap:wrap;color:var(--muted)}
+
+/* Editor */
+.tabs{display:flex;gap:.4rem;background:var(--bg);padding:.3rem;border-radius:14px}
+.tab{border:none;background:transparent;padding:.55rem 1.1rem;border-radius:10px;font-weight:800;font-size:1rem;min-height:2.6rem;color:var(--muted)}
+.tab.active{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.toolbar{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center;padding:.7rem 1.2rem;border-bottom:2px solid var(--line);background:#faf8f3}
+.toolbar .sep{width:2px;height:2rem;background:var(--line);margin:0 .2rem}
+.editor{flex:1;display:flex;min-height:0}
+.side{width:clamp(15rem,22vw,26rem);flex-shrink:0;background:var(--panel);border-right:2px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.side-head{padding:1rem;border-bottom:2px solid var(--line);display:flex;flex-direction:column;gap:.6rem}
+.side-head h2{margin:0;font-size:1.2rem;font-weight:800;display:flex;align-items:center;justify-content:space-between}
+.count{font-size:.85rem;color:var(--muted);font-weight:700}
+.addrow{display:flex;gap:.4rem}
+.input{flex:1;min-width:0;min-height:2.9rem;border:2px solid var(--line);border-radius:12px;padding:.4rem .8rem;background:#fff;font-size:1rem}
+.input:focus{outline:none;border-color:var(--accent)}
+.tray{flex:1;overflow:auto;padding:1rem;display:flex;flex-wrap:wrap;align-content:flex-start;gap:.55rem;transition:background .15s}
+.tray.hot{background:var(--accent-soft)}
+.tray-empty{color:var(--muted);text-align:center;width:100%;padding:1.5rem .5rem;line-height:1.5}
+.tray-empty b{color:var(--ink)}
+.chip{touch-action:none;user-select:none;-webkit-user-select:none;background:var(--chip);border:2px solid var(--chip-line);border-radius:12px;padding:.55rem .85rem;font-weight:800;font-size:1rem;cursor:grab;min-height:2.8rem;display:flex;align-items:center;max-width:100%}
+.chip.sel{outline:4px solid var(--accent);outline-offset:2px}
+.chip.dragging{opacity:.35}
+
+.stage{flex:1;display:flex;flex-direction:column;min-width:0;padding:1rem 1.2rem 1.2rem;gap:.8rem}
+.room{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;gap:.8rem}
+.room.flipped{flex-direction:column-reverse}
+.front{background:var(--front);color:#fff;border-radius:12px;padding:.55rem 2rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.9rem;text-align:center}
+.gridwrap{flex:1;width:100%;display:flex;align-items:center;justify-content:center;min-height:0}
+.grid{display:grid;gap:var(--gap,10px)}
+.seat{touch-action:none;user-select:none;-webkit-user-select:none;width:var(--cw);height:var(--ch);border-radius:calc(var(--cw) * .1);background:var(--seat);border:2px solid var(--seat-line);display:flex;align-items:center;justify-content:center;text-align:center;padding:4%;font-weight:800;font-size:var(--fs);line-height:1.1;position:relative;transition:background .12s,border-color .12s,transform .1s;overflow:hidden;word-break:break-word;cursor:pointer}
+.seat.empty::after{content:"";width:28%;height:6%;border-radius:4px;background:var(--seat-line);opacity:.7}
+.seat.filled{background:var(--chip);border-color:var(--chip-line);cursor:grab}
+.seat.hot{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.04)}
+.seat.sel{outline:4px solid var(--accent);outline-offset:2px}
+.seat.target{border-style:dashed;border-color:var(--accent)}
+.seat.off{background:transparent;border:2px dashed transparent}
+.seat.off::after{display:none}
+.editroom .seat{cursor:pointer}
+.editroom .seat.off{border-color:#cfc8b8}
+.editroom .seat:not(.off){background:#fff;border-color:var(--accent)}
+.seat .nm{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.seat .flag{position:absolute;top:4%;right:5%;font-size:.7em;opacity:.9}
+.seat.dragging{opacity:.35}
+.hint{color:var(--muted);text-align:center;font-size:.95rem}
+.banner{background:var(--accent-soft);color:var(--accent);border:2px solid #bfe0d7;border-radius:12px;padding:.6rem 1rem;font-weight:700;text-align:center}
+
+.dragghost{position:fixed;left:0;top:0;pointer-events:none;z-index:1000;background:var(--chip);border:2px solid var(--chip-line);border-radius:12px;padding:.6rem 1rem;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.2);transform:translate(-50%,-50%) rotate(-3deg);font-size:1.05rem;white-space:nowrap}
+
+/* Rules */
+.rules{flex:1;overflow:auto;padding:1.5rem clamp(1rem,3vw,3rem)}
+.rules-inner{max-width:1300px;margin:0 auto}
+.rules h2{font-size:1.6rem;margin:0 0 .3rem;font-weight:800}
+.rules .sub{color:var(--muted);margin:0 0 1.4rem}
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(20rem,1fr));gap:1.2rem}
+.rcard{background:var(--panel);border:2px solid var(--line);border-radius:var(--radius);padding:1.2rem;display:flex;flex-direction:column;gap:.8rem}
+.rcard h3{margin:0;font-size:1.2rem;font-weight:800;display:flex;align-items:center;gap:.5rem}
+.rcard p{margin:0;color:var(--muted);font-size:.95rem}
+.select{min-height:2.9rem;border:2px solid var(--line);border-radius:12px;padding:.3rem .6rem;background:#fff;font-size:1rem;flex:1;min-width:0}
+.select:focus{outline:none;border-color:var(--accent)}
+.rrow{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem;align-items:center}
+.rrow .btn{grid-column:1/-1}
+.rrow.one{grid-template-columns:1fr auto}
+.rrow.one .btn{grid-column:auto}
+.rrow .and{color:var(--muted);font-weight:700}
+.rlist{display:flex;flex-direction:column;gap:.45rem}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg);border-radius:12px;padding:.4rem .4rem .4rem .9rem;font-weight:700}
+.ritem.ok{background:var(--accent-soft)}
+.ritem.bad{background:var(--danger-soft)}
+.ritem .txt{flex:1}
+.ritem .st{font-size:.85rem;font-weight:800}
+.ritem.ok .st{color:var(--accent)}
+.ritem.bad .st{color:var(--danger)}
+.ritem .btn{min-height:2.4rem;width:2.4rem;padding:0}
+.rempty{color:var(--muted);font-style:italic;padding:.3rem 0}
+.rules-cta{margin:1.6rem 0 0;display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
+.rules-cta .btn{min-height:3.6rem;font-size:1.15rem;padding:.6rem 1.6rem}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(25,32,35,.45);display:flex;align-items:center;justify-content:center;z-index:500;padding:1rem;animation:fade .15s}
+.modal{background:var(--panel);border-radius:20px;padding:1.6rem;width:min(44rem,100%);max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:1rem;animation:pop .18s}
+.modal h2{margin:0;font-size:1.5rem;font-weight:800}
+.modal p{margin:0;color:var(--muted)}
+.modal .foot{display:flex;justify-content:flex-end;gap:.6rem;flex-wrap:wrap;margin-top:.4rem}
+.modal label.lbl{font-weight:800;display:block;margin-bottom:.35rem}
+textarea.input{min-height:11rem;resize:vertical;width:100%;line-height:1.4}
+@keyframes fade{from{opacity:0}}
+@keyframes pop{from{transform:scale(.96);opacity:0}}
+
+.picker-wrap{display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start}
+.picker{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;padding:10px;background:var(--bg);border-radius:14px;touch-action:none;flex:1;min-width:15rem;max-width:24rem}
+.picker i{aspect-ratio:1;border-radius:4px;background:#fff;border:2px solid var(--line);cursor:pointer}
+.picker i.on{background:var(--accent-soft);border-color:var(--accent)}
+.steppers{display:flex;flex-direction:column;gap:.8rem}
+.stepper{display:flex;align-items:center;gap:.5rem}
+.stepper .lab{width:5.2rem;font-weight:800}
+.stepper .val{min-width:2.5ch;text-align:center;font-size:1.5rem;font-weight:800}
+.dims{font-size:1.1rem;font-weight:800;color:var(--accent)}
+
+.classlist{display:flex;flex-direction:column;gap:.4rem;max-height:50vh;overflow:auto}
+.classlist .row{display:flex;gap:.4rem;align-items:center}
+.classlist .row .btn{min-height:2.6rem;width:2.6rem;padding:0}
+.classlist .row .input{min-height:2.6rem}
+
+.toast{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.8rem 1.4rem;border-radius:14px;font-weight:700;z-index:900;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:pop .2s;max-width:90vw;text-align:center}
+
+@media (max-width: 760px){
+  .editor{flex-direction:column}
+  .side{width:100%;border-right:none;border-bottom:2px solid var(--line);max-height:40vh}
+  .stage{min-height:60vh}
+  .plan-title{max-width:60vw}
+  .toolbar .sep{display:none}
+}
+@media print{
+  body{background:#fff}
+  .topbar .btn,.tabs,.toolbar,.side,.hint,.banner,.toast{display:none!important}
+  .topbar{border:none}
+  .stage{padding:0}
+  .seat{border-color:#999!important;background:#fff!important}
+  .seat.off{border:none!important}
+  .front{background:#fff;color:#000;border:2px solid #000}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+"use strict";
+/* ---------- Storage ---------- */
+const KEY = "seating-plans-v1";
+function loadStore(){
+  try{ const s = JSON.parse(localStorage.getItem(KEY)); if(s && Array.isArray(s.plans)) return s; }catch(e){}
+  return {plans:[]};
+}
+let store = loadStore();
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){ toast("Couldn't save in this browser"); }
+}
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- App state ---------- */
+const state = { view:"home", planId:null, tab:"seats", selected:null, editRoom:false, flipped:false, undo:[] };
+const plan = () => store.plans.find(p => p.id === state.planId);
+function touch(p){ p.updated = Date.now(); save(); }
+
+function newPlan(name, rows, cols, students){
+  const p = { id:uid(), name, rows, cols, off:[], students:students||[], seats:{}, together:[], apart:[], front:[], updated:Date.now() };
+  store.plans.unshift(p); save(); return p;
+}
+
+/* ---------- Helpers ---------- */
+function seatOf(p, sid){ for(const k in p.seats) if(p.seats[k] === sid) return +k; return null; }
+function nameOf(p, sid){ const s = p.students.find(s => s.id === sid); return s ? s.name : "?"; }
+function seatOrder(p){ // front row first, left to right
+  const out = []; for(let r=0;r<p.rows;r++) for(let c=0;c<p.cols;c++){ const i=r*p.cols+c; if(!p.off.includes(i)) out.push(i); } return out;
+}
+function cleanSeats(p){ // drop seats pointing at deleted students / off cells / out of range
+  const ids = new Set(p.students.map(s=>s.id));
+  for(const k in p.seats){ if(!ids.has(p.seats[k]) || p.off.includes(+k) || +k >= p.rows*p.cols) delete p.seats[k]; }
+  const ok = r => ids.has(r[0]) && ids.has(r[1]);
+  p.together = p.together.filter(ok); p.apart = p.apart.filter(ok);
+  p.front = p.front.filter(id => ids.has(id));
+}
+function pushUndo(p){ state.undo.push(JSON.stringify(p.seats)); if(state.undo.length>50) state.undo.shift(); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function neighbours(p, a, b){
+  if(a==null || b==null) return false;
+  const ra=Math.floor(a/p.cols), rb=Math.floor(b/p.cols);
+  return ra===rb && Math.abs(a-b)===1;
+}
+
+/* ---------- CSV / list parsing ---------- */
+function parseNames(text){
+  text = text.replace(/\r/g,"").trim();
+  if(!text) return [];
+  const splitLine = line => {
+    const out=[]; let cur="", q=false;
+    for(const ch of line){
+      if(ch === '"'){ q=!q; continue; }
+      if(!q && (ch === "," || ch === "\t" || ch === ";")){ out.push(cur.trim()); cur=""; continue; }
+      cur += ch;
+    }
+    out.push(cur.trim()); return out;
+  };
+  let lines = text.split("\n").map(l=>l.trim()).filter(Boolean);
+  if(lines.length === 1){ // "Ann, Bob, Cara" on one line
+    return splitLine(lines[0]).filter(Boolean);
+  }
+  const rows = lines.map(splitLine);
+  const multi = rows.filter(r => r.filter(Boolean).length > 1).length;
+  if(multi < rows.length/2) return rows.map(r => r.filter(Boolean).join(" ")).filter(Boolean);
+  // table-like: look for a header row
+  const head = rows[0].map(h => h.toLowerCase());
+  const find = (...keys) => head.findIndex(h => keys.some(k => h.includes(k)));
+  const iFirst = find("first","forename","given","preferred");
+  const iLast  = find("last","surname","family");
+  const iName  = head.findIndex(h => h === "name" || h === "student" || h === "full name" || h === "student name" || h==="pupil" || h==="pupil name");
+  const hasHeader = iFirst>=0 || iLast>=0 || iName>=0 || head.some(h => /name|email|id|class|year|form/.test(h));
+  let body = hasHeader ? rows.slice(1) : rows;
+  let names;
+  if(iFirst>=0 && iLast>=0) names = body.map(r => [r[iFirst], r[iLast]].filter(Boolean).join(" "));
+  else if(iName>=0) names = body.map(r => r[iName]);
+  else if(iFirst>=0) names = body.map(r => r[iFirst]);
+  else {
+    // no clear header: use the first one or two text-only columns
+    const isWordy = v => v && /[a-z]/i.test(v) && !/@|\d{3,}/.test(v);
+    names = body.map(r => {
+      const cols = r.filter(isWordy);
+      if(cols.length >= 2 && cols[0].split(" ").length===1 && cols[1].split(" ").length===1) return cols[0]+" "+cols[1];
+      return cols[0] || "";
+    });
+  }
+  return names.map(n => (n||"").trim()).filter(Boolean);
+}
+
+/* ---------- Arranging ---------- */
+function randomArrange(p){
+  pushUndo(p);
+  const order = seatOrder(p);
+  const ids = shuffle(p.students.map(s=>s.id));
+  p.seats = {};
+  ids.slice(0, order.length).forEach((id,i) => p.seats[order[i]] = id);
+  touch(p);
+  const left = ids.length - order.length;
+  toast(left>0 ? `Shuffled! ${left} student${left>1?"s":""} didn't fit – add more desks` : "Shuffled! 🎲");
+}
+function scoreLayout(p, pos){ // pos: Map sid -> seat
+  let s = 0;
+  for(const [a,b] of p.together) if(neighbours(p,pos.get(a),pos.get(b))) s += 10;
+  for(const [a,b] of p.apart){ const A=pos.get(a), B=pos.get(b); if(A!=null&&B!=null){ if(neighbours(p,A,B)) s -= 12; else { const d=Math.abs(Math.floor(A/p.cols)-Math.floor(B/p.cols))+Math.abs(A%p.cols-B%p.cols); if(d<=2) s -= 1; } } }
+  for(const id of p.front){ const A=pos.get(id); if(A!=null) s -= 4*Math.floor(A/p.cols); }
+  return s;
+}
+function ruleStatus(p){
+  const pos = new Map(Object.entries(p.seats).map(([k,v])=>[v,+k]));
+  const firstRow = Math.min(...seatOrder(p).map(i=>Math.floor(i/p.cols)));
+  const t = p.together.map(([a,b]) => neighbours(p,pos.get(a),pos.get(b)));
+  const ap = p.apart.map(([a,b]) => { const A=pos.get(a),B=pos.get(b); return !(A!=null&&B!=null&&neighbours(p,A,B)); });
+  const f = p.front.map(id => { const A=pos.get(id); return A!=null && Math.floor(A/p.cols) <= firstRow; });
+  const all=[...t,...ap,...f];
+  return {t,ap,f,met:all.filter(Boolean).length,total:all.length,seated:pos};
+}
+function smartArrange(p){
+  const order = seatOrder(p);
+  const ids = p.students.map(s=>s.id);
+  if(!ids.length){ toast("Add some students first"); return; }
+  pushUndo(p);
+  const n = Math.min(ids.length, order.length);
+  let best=null, bestScore=-Infinity;
+  const t0 = performance.now();
+  for(let run=0; run<60 && performance.now()-t0 < 700; run++){
+    const perm = shuffle(ids.slice());
+    // seats used: first n of order; perm[0..n-1] seated, rest unseated
+    const pos = new Map(); perm.forEach((id,i) => pos.set(id, i<n ? order[i] : null));
+    let sc = scoreLayout(p,pos);
+    for(let it=0; it<3000; it++){
+      const i=Math.floor(Math.random()*perm.length), j=Math.floor(Math.random()*n);
+      if(i===j) continue;
+      const a=perm[i], b=perm[j];
+      const pa=pos.get(a), pb=pos.get(b);
+      pos.set(a,pb); pos.set(b,pa);
+      const ns = scoreLayout(p,pos);
+      if(ns >= sc || Math.random() < 0.002){ sc=ns; [perm[i],perm[j]]=[perm[j],perm[i]]; }
+      else { pos.set(a,pa); pos.set(b,pb); }
+    }
+    if(sc > bestScore){ bestScore=sc; best=new Map(pos); }
+  }
+  p.seats = {};
+  for(const [id,seat] of best) if(seat!=null) p.seats[seat]=id;
+  touch(p);
+  const st = ruleStatus(p);
+  if(st.total===0) toast("Shuffled! (No requirements set yet)");
+  else if(st.met===st.total) toast(`All ${st.total} requirements met ✓`);
+  else toast(`${st.met} of ${st.total} requirements met – the rest weren't possible`);
+}
+
+/* ---------- Rendering ---------- */
+const app = document.getElementById("app");
+function render(){
+  if(state.view === "editor" && plan()) renderEditor(); else { state.view="home"; renderHome(); }
+}
+
+function miniGrid(p){
+  const cells=[]; for(let i=0;i<p.rows*p.cols;i++){ const cls = p.off.includes(i) ? "x" : (p.seats[i] ? "f" : ""); cells.push(`<i class="${cls}"></i>`); }
+  return `<div class="mini" style="grid-template-columns:repeat(${p.cols},1fr);grid-template-rows:repeat(${p.rows},1fr)">${cells.join("")}</div>`;
+}
+function when(t){
+  const d = new Date(t), now = new Date();
+  if(d.toDateString()===now.toDateString()) return "Today, " + d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  return d.toLocaleDateString([], {day:"numeric",month:"short",year: d.getFullYear()===now.getFullYear()?undefined:"numeric"});
+}
+
+function renderHome(){
+  app.innerHTML = `
+  <header class="topbar"><div class="brand"><span class="logo"><i></i><i></i><i></i><i></i></span>Seating Plans</div></header>
+  <main class="home">
+    <h1>Your seating plans</h1>
+    <p class="sub">${store.plans.length ? "Tap a plan to open it, or make a new one." : "Make your first plan: pick the room size, add your class, and drag them onto seats."}</p>
+    <div class="cards">
+      <div class="card new" data-act="new"><div class="plus">+</div>New seating plan</div>
+      ${store.plans.map(p => `
+        <div class="card" data-open="${p.id}">
+          ${miniGrid(p)}
+          <h3>${esc(p.name)}</h3>
+          <div class="meta">${p.students.length} students · ${p.rows}×${p.cols} room · ${when(p.updated)}</div>
+          <div class="actions">
+            <button class="btn" data-dup="${p.id}">Copy</button>
+            <button class="btn danger" data-del="${p.id}">Delete</button>
+          </div>
+        </div>`).join("")}
+    </div>
+    <div class="home-foot">
+      <button class="btn" data-act="export">⬇ Back up all plans</button>
+      <button class="btn" data-act="import">⬆ Restore from backup</button>
+    </div>
+    <p class="sub" style="margin-top:1rem;font-size:.9rem">Plans are saved in this browser on this device. Use “Back up” to move them to another computer.</p>
+  </main>`;
+}
+
+function renderEditor(){
+  const p = plan(); cleanSeats(p);
+  const seated = new Set(Object.values(p.seats));
+  const waiting = p.students.filter(s => !seated.has(s.id));
+  const st = ruleStatus(p);
+  app.innerHTML = `
+  <header class="topbar">
+    <button class="btn ghost" data-act="home">← All plans</button>
+    <input class="plan-title" id="title" value="${esc(p.name)}" aria-label="Plan name">
+    <div class="spacer"></div>
+    <div class="tabs">
+      <button class="tab ${state.tab==="seats"?"active":""}" data-tab="seats">Seating</button>
+      <button class="tab ${state.tab==="rules"?"active":""}" data-tab="rules">Set with requirements${st.total?` (${st.total})`:""}</button>
+    </div>
+  </header>
+  ${state.tab==="seats" ? seatsView(p, waiting, st) : rulesView(p, st)}`;
+  if(state.tab==="seats") layoutGrid();
+}
+
+function seatsView(p, waiting, st){
+  const cells=[];
+  const idxs=[]; for(let r=0;r<p.rows;r++) for(let c=0;c<p.cols;c++) idxs.push(r*p.cols+c);
+  if(state.flipped) idxs.reverse();
+  const frontIds = new Set(p.front);
+  for(const i of idxs){
+    const off = p.off.includes(i), sid = p.seats[i];
+    if(off) cells.push(`<div class="seat off" data-seat="${i}"></div>`);
+    else if(sid) cells.push(`<div class="seat filled ${state.selected===sid?"sel":""}" data-seat="${i}" data-sid="${sid}"><span class="nm">${esc(nameOf(p,sid))}</span></div>`);
+    else cells.push(`<div class="seat empty ${state.selected?"target":""}" data-seat="${i}"></div>`);
+  }
+  const nSeats = seatOrder(p).length;
+  return `
+  <div class="toolbar">
+    <button class="btn primary" data-act="random"><span class="ico">🎲</span>Random</button>
+    <button class="btn" data-act="smart"><span class="ico">✨</span>With requirements</button>
+    <span class="sep"></span>
+    <button class="btn" data-act="undo" ${state.undo.length?"":"disabled"}><span class="ico">↶</span>Undo</button>
+    <button class="btn" data-act="clear"><span class="ico">⟲</span>Clear seats</button>
+    <span class="sep"></span>
+    <button class="btn ${state.editRoom?"on":""}" data-act="editroom"><span class="ico">▦</span>${state.editRoom?"Done editing room":"Edit room"}</button>
+    <button class="btn" data-act="flip" title="Swap between teacher's view and students' view"><span class="ico">⇅</span>${state.flipped?"Board at top":"Board at bottom"}</button>
+    <button class="btn" data-act="print"><span class="ico">🖨</span>Print</button>
+  </div>
+  <div class="editor">
+    <aside class="side">
+      <div class="side-head">
+        <h2>Students</h2><span class="count" style="margin-top:-.4rem">${p.students.length - waiting.length}/${p.students.length} seated · ${nSeats} desks</span>
+        <form class="addrow" id="addform">
+          <input class="input" id="addname" placeholder="Type a name…" autocomplete="off">
+          <button class="btn primary iconbtn" title="Add student" aria-label="Add student">+</button>
+        </form>
+        <div class="addrow">
+          <button class="btn" style="flex:1" data-act="paste">📋 Paste list / CSV</button>
+          <button class="btn" data-act="classlist" title="Rename or remove students">✎ Edit</button>
+        </div>
+      </div>
+      <div class="tray" id="tray">
+        ${waiting.length ? waiting.map(s => `<div class="chip ${state.selected===s.id?"sel":""}" data-sid="${s.id}">${esc(s.name)}</div>`).join("")
+          : `<div class="tray-empty">${p.students.length ? "<b>Everyone has a seat!</b><br>Drag a student here to take them off their seat." : "<b>No students yet.</b><br>Type names above, or paste your class list."}</div>`}
+      </div>
+    </aside>
+    <section class="stage">
+      ${state.editRoom ? `<div class="banner">Tap squares to add or remove desks. Gaps make aisles. Change the size: <button class="btn" data-act="resize" style="min-height:2.4rem;margin-left:.4rem">Room size ${p.rows}×${p.cols}</button></div>` : ""}
+      <div class="room ${state.flipped?"flipped":""}">
+        <div class="front">Front of class · Board</div>
+        <div class="gridwrap" id="gridwrap">
+          <div class="grid ${state.editRoom?"editroom":""}" id="grid" style="grid-template-columns:repeat(${p.cols},auto)">${cells.join("")}</div>
+        </div>
+      </div>
+      ${!state.editRoom ? `<div class="hint">${state.selected ? `Now tap a desk to seat <b>${esc(nameOf(p,state.selected))}</b> (or tap them again to cancel)` : "Drag names onto desks — or tap a name, then tap a desk. Drop on a filled desk to swap."}</div>` : ""}
+    </section>
+  </div>`;
+}
+
+function opts(p, sel){
+  return `<option value="">Choose…</option>` + p.students.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(s=>`<option value="${s.id}" ${sel===s.id?"selected":""}>${esc(s.name)}</option>`).join("");
+}
+function rulesView(p, st){
+  const hasSeats = Object.keys(p.seats).length>0;
+  const item = (txt, ok, kind, i) => `<div class="ritem ${hasSeats?(ok?"ok":"bad"):""}"><span class="txt">${txt}</span>${hasSeats?`<span class="st">${ok?"✓ met":"✗ not met"}</span>`:""}<button class="btn ghost" data-rm="${kind}:${i}" aria-label="Remove">✕</button></div>`;
+  const nm = id => esc(nameOf(p,id));
+  const disabled = p.students.length<2 ? "disabled" : "";
+  return `
+  <div class="rules"><div class="rules-inner">
+    <h2>Set with requirements</h2>
+    <p class="sub">Tell the planner who should sit together, who should be kept apart, and who needs to be near the front. Then press the big button — it'll meet as many as it can.</p>
+    ${p.students.length<2?`<div class="banner" style="margin-bottom:1.2rem">Add at least two students on the Seating tab first.</div>`:""}
+    <div class="rule-grid">
+      <div class="rcard">
+        <h3>🤝 Sit next to each other</h3>
+        <p>These two will be put side by side in the same row.</p>
+        <div class="rrow"><select class="select" id="ta" ${disabled}>${opts(p)}</select><span class="and">&amp;</span><select class="select" id="tb" ${disabled}>${opts(p)}</select><button class="btn primary" data-add="together" ${disabled}>Add</button></div>
+        <div class="rlist">${p.together.length ? p.together.map((r,i)=>item(`${nm(r[0])} &amp; ${nm(r[1])}`, st.t[i], "together", i)).join("") : `<div class="rempty">None yet</div>`}</div>
+      </div>
+      <div class="rcard">
+        <h3>✋ Keep apart</h3>
+        <p>These two won't be put next to each other.</p>
+        <div class="rrow"><select class="select" id="aa" ${disabled}>${opts(p)}</select><span class="and">&amp;</span><select class="select" id="ab" ${disabled}>${opts(p)}</select><button class="btn primary" data-add="apart" ${disabled}>Add</button></div>
+        <div class="rlist">${p.apart.length ? p.apart.map((r,i)=>item(`${nm(r[0])} ✕ ${nm(r[1])}`, st.ap[i], "apart", i)).join("") : `<div class="rempty">None yet</div>`}</div>
+      </div>
+      <div class="rcard">
+        <h3>👀 Near the front</h3>
+        <p>For students who need to see the board — they'll get the front row.</p>
+        <div class="rrow one"><select class="select" id="fa" ${p.students.length?"":"disabled"}>${opts(p)}</select><button class="btn primary" data-add="front" ${p.students.length?"":"disabled"}>Add</button></div>
+        <div class="rlist">${p.front.length ? p.front.map((id,i)=>item(nm(id), st.f[i], "front", i)).join("") : `<div class="rempty">None yet</div>`}</div>
+      </div>
+    </div>
+    <div class="rules-cta">
+      <button class="btn primary" data-act="smartgo"><span class="ico">✨</span>Arrange seats using these requirements</button>
+      ${hasSeats && st.total ? `<span class="count" style="font-size:1rem">Current plan meets ${st.met} of ${st.total}</span>`:""}
+    </div>
+  </div></div>`;
+}
+
+/* Fit desks to the available space */
+function layoutGrid(){
+  const p = plan(), wrap = document.getElementById("gridwrap"), grid = document.getElementById("grid");
+  if(!wrap || !grid) return;
+  const W = wrap.clientWidth, H = wrap.clientHeight || window.innerHeight*0.6;
+  const gap = Math.max(6, Math.min(16, W/p.cols*0.08));
+  let cw = (W - gap*(p.cols-1)) / p.cols;
+  let ch = (H - gap*(p.rows-1)) / p.rows;
+  ch = Math.min(ch, cw*0.72); cw = Math.min(cw, ch/0.55, 260); ch = Math.min(ch, cw*0.72);
+  grid.style.setProperty("--cw", cw+"px");
+  grid.style.setProperty("--ch", ch+"px");
+  grid.style.setProperty("--gap", gap+"px");
+  grid.style.setProperty("--fs", Math.max(11, Math.min(cw*0.15, ch*0.27, 30))+"px");
+}
+window.addEventListener("resize", () => { if(state.view==="editor" && state.tab==="seats") layoutGrid(); });
+
+/* ---------- Toast & modal ---------- */
+let toastTimer;
+function toast(msg){
+  document.querySelectorAll(".toast").forEach(t=>t.remove());
+  const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t);
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.remove(), 3200);
+}
+function modal(html, onMount){
+  const o=document.createElement("div"); o.className="overlay";
+  o.innerHTML=`<div class="modal" role="dialog">${html}</div>`;
+  document.body.appendChild(o);
+  const close=()=>{ o.remove(); document.removeEventListener("keydown",key); };
+  const key=e=>{ if(e.key==="Escape") close(); };
+  document.addEventListener("keydown",key);
+  o.addEventListener("pointerdown", e=>{ if(e.target===o) o.dataset.down="1"; });
+  o.addEventListener("click", e=>{ if(e.target===o && o.dataset.down) close(); o.dataset.down=""; });
+  o.querySelectorAll("[data-close]").forEach(b=>b.onclick=close);
+  onMount && onMount(o.querySelector(".modal"), close);
+  return close;
+}
+function confirmBox(title, text, okLabel, onOk){
+  modal(`<h2>${title}</h2><p>${text}</p><div class="foot"><button class="btn" data-close>Cancel</button><button class="btn danger" id="ok">${okLabel}</button></div>`,
+    (m,close)=>{ m.querySelector("#ok").onclick=()=>{ close(); onOk(); }; });
+}
+
+function sizeModal(opts){
+  // opts: {title, rows, cols, name?, withName, okLabel, onOk(rows, cols, name, fromId, names)}
+  let rows=opts.rows, cols=opts.cols;
+  const others = store.plans.filter(p=>p.students.length);
+  modal(`
+    <h2>${opts.title}</h2>
+    ${opts.withName?`<div><label class="lbl" for="pn">Name</label><input class="input" id="pn" style="width:100%" value="${esc(opts.name||"")}" placeholder="e.g. 9B Maths"></div>`:""}
+    <div>
+      <label class="lbl">Room size — <span class="dims" id="dims"></span></label>
+      <p style="margin-bottom:.6rem">Tap the grid like inserting a table, or use the + and − buttons. (Rows go back from the board.)</p>
+      <div class="picker-wrap">
+        <div class="picker" id="picker">${Array.from({length:120},(_,i)=>`<i data-r="${Math.floor(i/12)+1}" data-c="${i%12+1}"></i>`).join("")}</div>
+        <div class="steppers">
+          <div class="stepper"><span class="lab">Rows</span><button class="btn iconbtn" data-st="r-">−</button><span class="val" id="rv"></span><button class="btn iconbtn" data-st="r+">+</button></div>
+          <div class="stepper"><span class="lab">Desks per row</span><button class="btn iconbtn" data-st="c-">−</button><span class="val" id="cv"></span><button class="btn iconbtn" data-st="c+">+</button></div>
+        </div>
+      </div>
+    </div>
+    ${opts.withName && others.length?`<div><label class="lbl" for="from">Start with students from</label><select class="select" id="from" style="width:100%"><option value="">Nobody – I'll add them</option>${others.map(p=>`<option value="${p.id}">${esc(p.name)} (${p.students.length})</option>`).join("")}</select></div>`:""}
+    <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="ok">${opts.okLabel}</button></div>`,
+  (m,close)=>{
+    const pick=m.querySelector("#picker");
+    const paint=(r,c)=>{ pick.querySelectorAll("i").forEach(i=>i.classList.toggle("on", +i.dataset.r<=r && +i.dataset.c<=c)); };
+    const upd=()=>{ m.querySelector("#rv").textContent=rows; m.querySelector("#cv").textContent=cols; m.querySelector("#dims").textContent=`${rows} × ${cols} = ${rows*cols} desks`; paint(rows,cols); };
+    upd();
+    let down=false;
+    const at=e=>{ const el=document.elementFromPoint(e.clientX,e.clientY); return el && el.parentNode===pick ? el : null; };
+    pick.addEventListener("pointerdown",e=>{ down=true; pick.setPointerCapture(e.pointerId); const el=at(e); if(el){ rows=+el.dataset.r; cols=+el.dataset.c; upd(); } });
+    pick.addEventListener("pointermove",e=>{ const el=at(e); if(!el) return; if(down){ rows=+el.dataset.r; cols=+el.dataset.c; upd(); } else paint(+el.dataset.r,+el.dataset.c); });
+    pick.addEventListener("pointerup",()=>{ down=false; });
+    pick.addEventListener("pointerleave",()=>{ if(!down) paint(rows,cols); });
+    m.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{ const k=b.dataset.st; if(k==="r-")rows=Math.max(1,rows-1); if(k==="r+")rows=Math.min(20,rows+1); if(k==="c-")cols=Math.max(1,cols-1); if(k==="c+")cols=Math.min(20,cols+1); upd(); });
+    const nameEl=m.querySelector("#pn"); if(nameEl) setTimeout(()=>nameEl.focus(),50);
+    m.querySelector("#ok").onclick=()=>{
+      const name = nameEl ? (nameEl.value.trim() || "Untitled plan") : null;
+      const from = m.querySelector("#from")?.value || null;
+      close(); opts.onOk(rows, cols, name, from);
+    };
+    if(nameEl) nameEl.addEventListener("keydown",e=>{ if(e.key==="Enter") m.querySelector("#ok").click(); });
+  });
+}
+
+function pasteModal(){
+  const p=plan();
+  modal(`
+    <h2>Add your class list</h2>
+    <p>Paste names below — one per line, separated by commas, or straight from a spreadsheet. You can also open a CSV file.</p>
+    <textarea class="input" id="pt" placeholder="Amelia Jones&#10;Ben Carter&#10;Chloe Patel&#10;…"></textarea>
+    <div class="addrow" style="align-items:center"><label class="btn" style="cursor:pointer">📂 Open CSV file<input type="file" id="pf" accept=".csv,.txt,.tsv,text/csv,text/plain" hidden></label><span class="count" id="pc" style="font-size:1rem"></span></div>
+    <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="ok" disabled>Add students</button></div>`,
+  (m,close)=>{
+    const ta=m.querySelector("#pt"), pc=m.querySelector("#pc"), ok=m.querySelector("#ok");
+    const upd=()=>{ const n=parseNames(ta.value); pc.textContent = n.length ? `Found ${n.length} name${n.length>1?"s":""}: ${n.slice(0,4).join(", ")}${n.length>4?"…":""}` : ""; ok.disabled=!n.length; ok.textContent = n.length?`Add ${n.length} student${n.length>1?"s":""}`:"Add students"; };
+    ta.addEventListener("input",upd);
+    setTimeout(()=>ta.focus(),50);
+    m.querySelector("#pf").onchange=e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ ta.value=t; upd(); }); };
+    ok.onclick=()=>{
+      const names=parseNames(ta.value);
+      const existing=new Set(p.students.map(s=>s.name.toLowerCase()));
+      let added=0, skipped=0;
+      for(const n of names){ if(existing.has(n.toLowerCase())){ skipped++; continue; } existing.add(n.toLowerCase()); p.students.push({id:uid(),name:n}); added++; }
+      touch(p); close(); render();
+      toast(`Added ${added} student${added===1?"":"s"}${skipped?` (${skipped} already in the list)`:""}`);
+    };
+  });
+}
+
+function classListModal(){
+  const p=plan();
+  const rowsHtml=()=>p.students.length ? p.students.map(s=>`<div class="row"><input class="input" data-rn="${s.id}" value="${esc(s.name)}"><button class="btn danger" data-rs="${s.id}" aria-label="Remove ${esc(s.name)}">✕</button></div>`).join("") : `<p>No students yet.</p>`;
+  modal(`<h2>Class list (${p.students.length})</h2><p>Change a name by typing over it, or remove a student with ✕.</p>
+    <div class="classlist" id="cl">${rowsHtml()}</div>
+    <div class="foot">${p.students.length?`<button class="btn danger" id="rmall" style="margin-right:auto">Remove everyone</button>`:""}<button class="btn primary" data-close>Done</button></div>`,
+  (m,close)=>{
+    const cl=m.querySelector("#cl");
+    const bind=()=>{
+      cl.querySelectorAll("[data-rn]").forEach(inp=>inp.oninput=()=>{ const s=p.students.find(s=>s.id===inp.dataset.rn); if(s && inp.value.trim()){ s.name=inp.value.trim(); touch(p); } });
+      cl.querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>{ p.students=p.students.filter(s=>s.id!==b.dataset.rs); cleanSeats(p); touch(p); cl.innerHTML=rowsHtml(); bind(); m.querySelector("h2").textContent=`Class list (${p.students.length})`; });
+    };
+    bind();
+    const ra=m.querySelector("#rmall"); if(ra) ra.onclick=()=>{ close(); confirmBox("Remove everyone?","This removes all students and requirements from this plan.","Remove all",()=>{ p.students=[]; p.seats={}; cleanSeats(p); touch(p); render(); }); };
+    const obs=new MutationObserver(()=>{ if(!document.body.contains(m)){ obs.disconnect(); render(); } });
+    obs.observe(document.body,{childList:true});
+  });
+}
+
+/* ---------- Actions ---------- */
+function openPlan(id){ state.view="editor"; state.planId=id; state.tab="seats"; state.selected=null; state.editRoom=false; state.undo=[]; render(); }
+
+function place(p, sid, seat){
+  if(p.off.includes(seat)) return;
+  pushUndo(p);
+  const cur=seatOf(p,sid), occ=p.seats[seat];
+  if(occ===sid) { state.undo.pop(); return; }
+  if(cur!=null) delete p.seats[cur];
+  if(occ && cur!=null) p.seats[cur]=occ;
+  p.seats[seat]=sid;
+  touch(p);
+}
+function unseat(p, sid){ const cur=seatOf(p,sid); if(cur!=null){ pushUndo(p); delete p.seats[cur]; touch(p); } }
+
+app.addEventListener("click", e=>{
+  if(justDragged){ justDragged=false; return; }
+  const t=e.target.closest("[data-act],[data-open],[data-dup],[data-del],[data-tab],[data-add],[data-rm],.seat,.chip,.tray");
+  if(!t) return;
+  const p=plan();
+  if(t.dataset.dup){ e.stopPropagation(); const src=store.plans.find(x=>x.id===t.dataset.dup); const c=JSON.parse(JSON.stringify(src)); c.id=uid(); c.name=src.name+" (copy)"; c.updated=Date.now(); store.plans.unshift(c); save(); render(); toast("Plan copied"); return; }
+  if(t.dataset.del){ e.stopPropagation(); const src=store.plans.find(x=>x.id===t.dataset.del); confirmBox("Delete this plan?",`“${esc(src.name)}” will be gone for good.`,"Delete",()=>{ store.plans=store.plans.filter(x=>x!==src); save(); render(); }); return; }
+  if(t.dataset.open){ openPlan(t.dataset.open); return; }
+  if(t.dataset.tab){ state.tab=t.dataset.tab; state.selected=null; render(); return; }
+  if(t.dataset.add){
+    const k=t.dataset.add;
+    if(k==="front"){ const a=document.getElementById("fa").value; if(!a) return toast("Pick a student"); if(p.front.includes(a)) return toast("Already on the list"); p.front.push(a); }
+    else {
+      const a=document.getElementById(k==="together"?"ta":"aa").value, b=document.getElementById(k==="together"?"tb":"ab").value;
+      if(!a||!b) return toast("Pick two students");
+      if(a===b) return toast("Pick two different students");
+      const list=p[k]; if(list.some(r=>(r[0]===a&&r[1]===b)||(r[0]===b&&r[1]===a))) return toast("That pair is already there");
+      const other=k==="together"?p.apart:p.together;
+      if(other.some(r=>(r[0]===a&&r[1]===b)||(r[0]===b&&r[1]===a))) return toast(k==="together"?"That pair is set to keep apart":"That pair is set to sit together");
+      list.push([a,b]);
+    }
+    touch(p); render(); return;
+  }
+  if(t.dataset.rm){ const [k,i]=t.dataset.rm.split(":"); p[k].splice(+i,1); touch(p); render(); return; }
+  const act=t.dataset.act;
+  if(act){
+    switch(act){
+      case "home": state.view="home"; render(); break;
+      case "new": sizeModal({title:"New seating plan", withName:true, rows:5, cols:6, okLabel:"Create plan", onOk:(r,c,name,from)=>{
+          const src=from && store.plans.find(x=>x.id===from);
+          const students = src ? src.students.map(s=>({...s})) : [];
+          const np=newPlan(name,r,c,students);
+          if(src){ np.together=JSON.parse(JSON.stringify(src.together)); np.apart=JSON.parse(JSON.stringify(src.apart)); np.front=[...src.front]; }
+          save(); openPlan(np.id);
+        }}); break;
+      case "random": if(!p.students.length) return toast("Add some students first"); randomArrange(p); render(); break;
+      case "smart": if(!p.students.length) return toast("Add some students first");
+        if(!(p.together.length+p.apart.length+p.front.length)){ toast("No requirements yet — set some up in this tab"); state.tab="rules"; render(); break; }
+        smartArrange(p); render(); break;
+      case "smartgo": smartArrange(p); if(p.students.length){ state.tab="seats"; } render(); break;
+      case "undo": if(state.undo.length){ p.seats=JSON.parse(state.undo.pop()); touch(p); render(); } break;
+      case "clear": if(!Object.keys(p.seats).length) return toast("No one is seated yet"); pushUndo(p); p.seats={}; touch(p); render(); toast("Everyone's back in the list (Undo to bring them back)"); break;
+      case "editroom": state.editRoom=!state.editRoom; state.selected=null; render(); break;
+      case "flip": state.flipped=!state.flipped; render(); break;
+      case "print": window.print(); break;
+      case "paste": pasteModal(); break;
+      case "classlist": classListModal(); break;
+      case "resize": sizeModal({title:"Change room size", rows:p.rows, cols:p.cols, okLabel:"Resize", onOk:(r,c)=>{
+          // keep desks at the same row/column positions
+          const seats={}, off=[];
+          for(const k in p.seats){ const rr=Math.floor(k/p.cols), cc=k%p.cols; if(rr<r&&cc<c) seats[rr*c+cc]=p.seats[k]; }
+          for(const k of p.off){ const rr=Math.floor(k/p.cols), cc=k%p.cols; if(rr<r&&cc<c) off.push(rr*c+cc); }
+          pushUndo(p); state.undo=[]; p.rows=r; p.cols=c; p.seats=seats; p.off=off; touch(p); render();
+        }}); break;
+      case "export": exportAll(); break;
+      case "import": importAll(); break;
+    }
+    return;
+  }
+  // seats / chips / tray (tap mode)
+  if(state.view!=="editor") return;
+  if(t.classList.contains("seat")){
+    const i=+t.dataset.seat;
+    if(state.editRoom){
+      const k=p.off.indexOf(i);
+      if(k>=0) p.off.splice(k,1); else { p.off.push(i); delete p.seats[i]; }
+      state.undo=[]; touch(p); render(); return;
+    }
+    if(t.classList.contains("off")) return;
+    const sid=p.seats[i];
+    if(state.selected){
+      if(state.selected===sid){ state.selected=null; }
+      else { place(p,state.selected,i); state.selected=null; }
+    } else if(sid) state.selected=sid;
+    render(); return;
+  }
+  if(t.classList.contains("chip")){ const sid=t.dataset.sid; state.selected = state.selected===sid ? null : sid; render(); return; }
+  if(t.classList.contains("tray") && state.selected){ unseat(p,state.selected); state.selected=null; render(); return; }
+});
+
+app.addEventListener("submit", e=>{
+  if(e.target.id!=="addform") return;
+  e.preventDefault();
+  const inp=document.getElementById("addname"), raw=inp.value.trim(); if(!raw) return;
+  const p=plan();
+  const names = /[,\t;\n]/.test(raw) ? parseNames(raw) : [raw];
+  for(const n of names) p.students.push({id:uid(), name:n});
+  touch(p); render();
+  const ni=document.getElementById("addname"); ni && ni.focus();
+});
+app.addEventListener("input", e=>{
+  if(e.target.id==="title"){ const p=plan(); p.name=e.target.value.trim()||"Untitled plan"; touch(p); }
+});
+app.addEventListener("keydown", e=>{ if(e.target.id==="title" && e.key==="Enter") e.target.blur(); });
+app.addEventListener("paste", e=>{ // pasting several lines into the add box opens it straight in
+  if(e.target.id!=="addname") return;
+  const txt=(e.clipboardData||window.clipboardData).getData("text");
+  if(txt && txt.trim().includes("\n")){ e.preventDefault(); pasteModal(); setTimeout(()=>{ const ta=document.getElementById("pt"); if(ta){ ta.value=txt; ta.dispatchEvent(new Event("input")); } },60); }
+});
+
+/* ---------- Drag & drop (mouse, touch, pen) ---------- */
+let drag=null, justDragged=false;
+app.addEventListener("pointerdown", e=>{
+  if(state.view!=="editor" || state.editRoom || e.button>0) return;
+  const el=e.target.closest("[data-sid]"); if(!el) return;
+  drag={sid:el.dataset.sid, el, x:e.clientX, y:e.clientY, started:false, ghost:null, hot:null};
+});
+window.addEventListener("pointermove", e=>{
+  if(!drag) return;
+  if(!drag.started){
+    if(Math.hypot(e.clientX-drag.x, e.clientY-drag.y) < 8) return;
+    drag.started=true;
+    const g=document.createElement("div"); g.className="dragghost"; g.textContent=nameOf(plan(),drag.sid); document.body.appendChild(g); drag.ghost=g;
+    drag.el.classList.add("dragging"); state.selected=null;
+    document.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel"));
+  }
+  e.preventDefault();
+  drag.ghost.style.left=e.clientX+"px"; drag.ghost.style.top=e.clientY+"px";
+  const under=document.elementFromPoint(e.clientX,e.clientY);
+  const tgt=under && (under.closest(".seat:not(.off)") || under.closest(".tray"));
+  if(tgt!==drag.hot){ drag.hot && drag.hot.classList.remove("hot"); drag.hot=tgt; tgt && tgt.classList.add("hot"); }
+}, {passive:false});
+function endDrag(e, cancel){
+  if(!drag) return;
+  const d=drag; drag=null;
+  if(!d.started) return;
+  d.ghost.remove(); d.el.classList.remove("dragging"); d.hot && d.hot.classList.remove("hot");
+  justDragged=true; setTimeout(()=>justDragged=false, 50);
+  if(cancel || !d.hot) return;
+  const p=plan();
+  if(d.hot.classList.contains("tray")) unseat(p,d.sid);
+  else place(p,d.sid,+d.hot.dataset.seat);
+  render();
+}
+window.addEventListener("pointerup", e=>endDrag(e,false));
+window.addEventListener("pointercancel", e=>endDrag(e,true));
+
+/* ---------- Backup ---------- */
+function exportAll(){
+  const blob=new Blob([JSON.stringify(store,null,1)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=`seating-plans-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function importAll(){
+  const inp=document.createElement("input"); inp.type="file"; inp.accept=".json,application/json";
+  inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; f.text().then(t=>{
+    try{ const s=JSON.parse(t); if(!Array.isArray(s.plans)) throw 0;
+      const have=new Set(store.plans.map(p=>p.id)); let n=0;
+      for(const p of s.plans){ if(!have.has(p.id)){ store.plans.push(p); n++; } }
+      save(); render(); toast(`Restored ${n} plan${n===1?"":"s"}`);
+    }catch(e){ toast("That file isn't a seating plan backup"); }
+  }); };
+  inp.click();
+}
+
+render();
+</script>
+</body>
+</html>
