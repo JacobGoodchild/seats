@@ -107,6 +107,8 @@ button{cursor:pointer}
 .seat .nm{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .seat .flag{position:absolute;top:4%;right:5%;font-size:.7em;opacity:.9}
 .seat.dragging{opacity:.35}
+.seat.pop{animation:deal .35s both}
+@keyframes deal{from{transform:scale(.6) translateY(-12px);opacity:0}}
 .hint{color:var(--muted);text-align:center;font-size:.95rem}
 .banner{background:var(--accent-soft);color:var(--accent);border:2px solid #bfe0d7;border-radius:12px;padding:.6rem 1rem;font-weight:700;text-align:center}
 
@@ -206,7 +208,7 @@ const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(3
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- App state ---------- */
-const state = { view:"home", planId:null, tab:"seats", selected:null, editRoom:false, flipped:false, undo:[] };
+const state = { anim:false, view:"home", planId:null, tab:"seats", selected:null, editRoom:false, flipped:false, undo:[] };
 const plan = () => store.plans.find(p => p.id === state.planId);
 function touch(p){ p.updated = Date.now(); save(); }
 
@@ -401,6 +403,7 @@ function renderEditor(){
   </header>
   ${state.tab==="seats" ? seatsView(p, waiting, st) : rulesView(p, st)}`;
   if(state.tab==="seats") layoutGrid();
+  state.anim=false;
 }
 
 function seatsView(p, waiting, st){
@@ -411,7 +414,7 @@ function seatsView(p, waiting, st){
   for(const i of idxs){
     const off = p.off.includes(i), sid = p.seats[i];
     if(off) cells.push(`<div class="seat off" data-seat="${i}"></div>`);
-    else if(sid) cells.push(`<div class="seat filled ${state.selected===sid?"sel":""}" data-seat="${i}" data-sid="${sid}"><span class="nm">${esc(nameOf(p,sid))}</span></div>`);
+    else if(sid) cells.push(`<div class="seat filled ${state.selected===sid?"sel":""} ${state.anim?"pop":""}" style="${state.anim?`animation-delay:${(seatOrder(p).indexOf(i)*18)}ms`:""}" data-seat="${i}" data-sid="${sid}"><span class="nm">${esc(nameOf(p,sid))}</span></div>`);
     else cells.push(`<div class="seat empty ${state.selected?"target":""}" data-seat="${i}"></div>`);
   }
   const nSeats = seatOrder(p).length;
@@ -426,6 +429,7 @@ function seatsView(p, waiting, st){
     <button class="btn ${state.editRoom?"on":""}" data-act="editroom"><span class="ico">▦</span>${state.editRoom?"Done editing room":"Edit room"}</button>
     <button class="btn" data-act="flip" title="Swap between teacher's view and students' view"><span class="ico">⇅</span>${state.flipped?"Board at top":"Board at bottom"}</button>
     <button class="btn" data-act="print"><span class="ico">🖨</span>Print</button>
+    <button class="btn" data-act="full" title="Full screen"><span class="ico">⛶</span>${document.fullscreenElement?"Exit full screen":"Full screen"}</button>
   </div>
   <div class="editor">
     <aside class="side">
@@ -512,6 +516,7 @@ function layoutGrid(){
   grid.style.setProperty("--gap", gap+"px");
   grid.style.setProperty("--fs", Math.max(11, Math.min(cw*0.15, ch*0.27, 30))+"px");
 }
+document.addEventListener("fullscreenchange", () => { if(state.view==="editor") render(); });
 window.addEventListener("resize", () => { if(state.view==="editor" && state.tab==="seats") layoutGrid(); });
 
 /* ---------- Toast & modal ---------- */
@@ -675,16 +680,17 @@ app.addEventListener("click", e=>{
           if(src){ np.together=JSON.parse(JSON.stringify(src.together)); np.apart=JSON.parse(JSON.stringify(src.apart)); np.front=[...src.front]; }
           save(); openPlan(np.id);
         }}); break;
-      case "random": if(!p.students.length) return toast("Add some students first"); randomArrange(p); render(); break;
+      case "random": if(!p.students.length) return toast("Add some students first"); randomArrange(p); state.anim=true; render(); break;
       case "smart": if(!p.students.length) return toast("Add some students first");
         if(!(p.together.length+p.apart.length+p.front.length)){ toast("No requirements yet — set some up in this tab"); state.tab="rules"; render(); break; }
-        smartArrange(p); render(); break;
-      case "smartgo": smartArrange(p); if(p.students.length){ state.tab="seats"; } render(); break;
+        smartArrange(p); state.anim=true; render(); break;
+      case "smartgo": smartArrange(p); if(p.students.length){ state.tab="seats"; state.anim=true; } render(); break;
       case "undo": if(state.undo.length){ p.seats=JSON.parse(state.undo.pop()); touch(p); render(); } break;
       case "clear": if(!Object.keys(p.seats).length) return toast("No one is seated yet"); pushUndo(p); p.seats={}; touch(p); render(); toast("Everyone's back in the list (Undo to bring them back)"); break;
       case "editroom": state.editRoom=!state.editRoom; state.selected=null; render(); break;
       case "flip": state.flipped=!state.flipped; render(); break;
       case "print": window.print(); break;
+      case "full": try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }catch(e){} break;
       case "paste": pasteModal(); break;
       case "classlist": classListModal(); break;
       case "resize": sizeModal({title:"Change room size", rows:p.rows, cols:p.cols, okLabel:"Resize", onOk:(r,c)=>{
