@@ -5,204 +5,214 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Seating Plans</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f4f1ea; --panel:#ffffff; --ink:#1f2a30; --muted:#6b7780; --line:#e2ddd2;
-  --accent:#2f7d6d; --accent-ink:#fff; --accent-soft:#e3f1ed;
-  --seat:#fbfaf6; --seat-line:#d8d2c4; --chip:#fff3d6; --chip-line:#ecd49a;
-  --danger:#c2483d; --danger-soft:#fbe7e4; --warn:#b7791f;
-  --front:#34444d;
-  --radius:16px; --shadow:0 2px 10px rgba(30,40,40,.08);
+  --bg:#f6f6f4; --surface:#ffffff; --ink:#18181b; --ink-2:#3f3f46; --muted:#71717a; --faint:#a1a1aa;
+  --line:#e4e4e7; --line-2:#d4d4d8;
+  --accent:#2f5bd3; --accent-soft:#eef2fd; --accent-line:#b9c8f3;
+  --danger:#c23a2b; --danger-soft:#fdf1ef;
+  --ok:#1f7a4d; --ok-soft:#eef7f2;
+  --r:8px;
 }
 *{box-sizing:border-box}
-html{font-size:clamp(16px, 0.55rem + 0.75vw, 28px)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:500;-webkit-font-smoothing:antialiased}
-button,input,select,textarea{font:inherit;color:inherit}
+html{font-size:clamp(15px, 0.5rem + 0.72vw, 26px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:450;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+button,input,select,textarea{font:inherit;color:inherit;letter-spacing:inherit}
 button{cursor:pointer}
 .app{min-height:100vh;display:flex;flex-direction:column}
+svg.i{width:1.15em;height:1.15em;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
 /* Buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:2.9rem;padding:.55rem 1.1rem;border-radius:12px;border:2px solid var(--line);background:var(--panel);font-weight:700;font-size:1rem;line-height:1.1;transition:transform .08s, background .15s, border-color .15s;white-space:nowrap}
-.btn:hover{border-color:#c9c2b2}
-.btn:active{transform:scale(.97)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn.primary:hover{filter:brightness(1.07)}
-.btn.danger{color:var(--danger);border-color:#efc9c4;background:var(--danger-soft)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:2.75rem;padding:.5rem 1rem;border-radius:var(--r);border:1px solid var(--line-2);background:var(--surface);font-weight:550;font-size:.95rem;line-height:1.1;white-space:nowrap;transition:background .12s,border-color .12s,color .12s}
+.btn:hover{background:#fafafa;border-color:#c4c4ca}
+.btn:active{background:#f1f1f2}
+.btn:focus-visible,.tab:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.primary:hover{background:#2c2c31}
+.btn.danger{color:var(--danger)}
+.btn.danger:hover{background:var(--danger-soft);border-color:#efc4bd}
 .btn.ghost{background:transparent;border-color:transparent}
-.btn.ghost:hover{background:rgba(0,0,0,.05)}
-.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
-.btn:disabled{opacity:.45;cursor:default;transform:none}
-.btn .ico{font-size:1.15em;line-height:1}
-.iconbtn{width:2.9rem;padding:0}
+.btn.ghost:hover{background:rgba(0,0,0,.045)}
+.btn.on{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default;background:var(--surface)}
+.iconbtn{width:2.75rem;padding:0}
+.btn.sm{min-height:2.3rem;padding:.3rem .7rem;font-size:.88rem}
+.btn.sm.iconbtn{width:2.3rem;padding:0}
 
 /* Top bar */
-.topbar{display:flex;align-items:center;gap:.75rem;padding:.8rem 1.2rem;background:var(--panel);border-bottom:2px solid var(--line);flex-wrap:wrap}
-.brand{font-weight:800;font-size:1.35rem;display:flex;align-items:center;gap:.5rem}
-.brand .logo{width:1.8rem;height:1.8rem;border-radius:8px;background:var(--accent);display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:5px}
-.brand .logo i{background:#fff;border-radius:2px;opacity:.9}
+.topbar{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap;min-height:4rem}
+.brand{font-weight:650;font-size:1.1rem;display:flex;align-items:center;gap:.6rem;letter-spacing:-.01em}
+.logo{width:1.4rem;height:1.4rem;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:2px}
+.logo i{background:var(--ink);border-radius:2px}
+.logo i:nth-child(5){background:var(--accent)}
 .spacer{flex:1}
-.plan-title{font-weight:800;font-size:1.3rem;border:2px solid transparent;border-radius:10px;padding:.3rem .5rem;background:transparent;min-width:6ch;max-width:40vw}
+.plan-title{font-weight:650;font-size:1.15rem;border:1px solid transparent;border-radius:var(--r);padding:.35rem .55rem;background:transparent;min-width:6ch;max-width:36vw;letter-spacing:-.01em}
 .plan-title:hover{border-color:var(--line)}
 .plan-title:focus{outline:none;border-color:var(--accent);background:#fff}
 
 /* Home */
-.home{padding:2rem clamp(1rem,4vw,4rem);max-width:1500px;width:100%;margin:0 auto}
-.home h1{font-size:2rem;margin:.2rem 0 .3rem;font-weight:800}
-.home .sub{color:var(--muted);margin:0 0 1.6rem;font-size:1.1rem}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:1.2rem}
-.card{background:var(--panel);border:2px solid var(--line);border-radius:var(--radius);padding:1rem;display:flex;flex-direction:column;gap:.7rem;box-shadow:var(--shadow);cursor:pointer;transition:transform .12s,border-color .12s}
-.card:hover{transform:translateY(-2px);border-color:var(--accent)}
-.card.new{align-items:center;justify-content:center;border-style:dashed;background:transparent;box-shadow:none;min-height:14rem;color:var(--accent);font-weight:800;font-size:1.2rem}
-.card.new .plus{font-size:3rem;line-height:1}
-.card h3{margin:0;font-size:1.25rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.card .meta{color:var(--muted);font-size:.9rem}
-.card .actions{display:flex;gap:.4rem;margin-top:auto}
-.card .actions .btn{min-height:2.5rem;padding:.3rem .7rem;font-size:.9rem}
-.mini{background:var(--bg);border-radius:10px;padding:.6rem;display:grid;gap:3px;aspect-ratio:16/10}
-.mini i{border-radius:2px;background:#ddd6c8}
-.mini i.f{background:var(--accent)}
+.home{padding:2.5rem clamp(1rem,4vw,4rem);max-width:1400px;width:100%;margin:0 auto}
+.home-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.75rem}
+.home h1{font-size:1.75rem;margin:0 0 .25rem;font-weight:650;letter-spacing:-.02em}
+.home .sub{color:var(--muted);margin:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1rem;display:flex;flex-direction:column;gap:.8rem;cursor:pointer;transition:border-color .12s,box-shadow .12s}
+.card:hover{border-color:var(--line-2);box-shadow:0 4px 18px rgba(0,0,0,.05)}
+.card h3{margin:0;font-size:1.05rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .meta{color:var(--muted);font-size:.85rem;margin-top:.15rem}
+.card .actions{display:flex;gap:.35rem;margin-top:auto}
+.mini{background:var(--bg);border-radius:8px;padding:.75rem;display:grid;gap:3px;aspect-ratio:16/10;border-top:3px solid var(--ink-2)}
+.mini i{border-radius:2px;background:var(--line)}
+.mini i.f{background:var(--ink-2)}
 .mini i.x{background:transparent}
-.home-foot{margin-top:2.5rem;display:flex;gap:.6rem;flex-wrap:wrap;color:var(--muted)}
+.empty-home{border:1px dashed var(--line-2);border-radius:12px;padding:3.5rem 1.5rem;text-align:center;color:var(--muted);background:var(--surface)}
+.empty-home h2{color:var(--ink);font-weight:600;font-size:1.25rem;margin:0 0 .4rem}
+.empty-home p{margin:0 0 1.4rem}
+.home-foot{margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--line);display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:.88rem}
 
 /* Editor */
-.tabs{display:flex;gap:.4rem;background:var(--bg);padding:.3rem;border-radius:14px}
-.tab{border:none;background:transparent;padding:.55rem 1.1rem;border-radius:10px;font-weight:800;font-size:1rem;min-height:2.6rem;color:var(--muted)}
-.tab.active{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
-.toolbar{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center;padding:.7rem 1.2rem;border-bottom:2px solid var(--line);background:#faf8f3}
-.toolbar .sep{width:2px;height:2rem;background:var(--line);margin:0 .1rem}
-.toolbar .btn{padding:.5rem .8rem}
+.tabs{display:flex;gap:.25rem;background:var(--bg);padding:.25rem;border-radius:10px;border:1px solid var(--line)}
+.tab{border:none;background:transparent;padding:.45rem 1rem;border-radius:7px;font-weight:550;font-size:.95rem;min-height:2.4rem;color:var(--muted);display:inline-flex;align-items:center;gap:.45rem}
+.tab:hover{color:var(--ink)}
+.tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.badge{font-size:.75rem;background:var(--accent);color:#fff;border-radius:99px;padding:.05rem .45rem;font-weight:600}
+.toolbar{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;padding:.6rem 1.25rem;border-bottom:1px solid var(--line);background:var(--surface)}
+.toolbar .sep{width:1px;height:1.6rem;background:var(--line);margin:0 .3rem}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:3px;gap:2px}
+.seg button{border:none;background:transparent;border-radius:6px;padding:.3rem .8rem;font-weight:550;font-size:.9rem;min-height:calc(2.75rem - 8px);color:var(--muted)}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1)}
 .editor{flex:1;display:flex;min-height:0}
-.side{width:clamp(15rem,22vw,26rem);flex-shrink:0;background:var(--panel);border-right:2px solid var(--line);display:flex;flex-direction:column;min-height:0}
-.side-head{padding:1rem;border-bottom:2px solid var(--line);display:flex;flex-direction:column;gap:.6rem}
-.side-head h2{margin:0;font-size:1.2rem;font-weight:800;display:flex;align-items:center;justify-content:space-between}
-.count{font-size:.85rem;color:var(--muted);font-weight:700}
+.side{width:clamp(15rem,21vw,24rem);flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.side-head{padding:1.1rem 1rem 1rem;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:.55rem}
+.side-head h2{margin:0;font-size:1rem;font-weight:600;display:flex;flex-direction:column;gap:.15rem}
+.count{font-size:.82rem;color:var(--muted);font-weight:500}
 .addrow{display:flex;gap:.4rem}
-.input{flex:1;min-width:0;min-height:2.9rem;border:2px solid var(--line);border-radius:12px;padding:.4rem .8rem;background:#fff;font-size:1rem}
-.input:focus{outline:none;border-color:var(--accent)}
-.tray{flex:1;overflow:auto;padding:1rem;display:flex;flex-wrap:wrap;align-content:flex-start;gap:.55rem;transition:background .15s}
+.input{flex:1;min-width:0;min-height:2.75rem;border:1px solid var(--line-2);border-radius:var(--r);padding:.4rem .75rem;background:#fff;font-size:.95rem}
+.input::placeholder{color:var(--faint)}
+.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.tray{flex:1;overflow:auto;padding:1rem;display:flex;flex-wrap:wrap;align-content:flex-start;gap:.45rem;transition:background .12s}
 .tray.hot{background:var(--accent-soft)}
-.tray-empty{color:var(--muted);text-align:center;width:100%;padding:1.5rem .5rem;line-height:1.5}
-.tray-empty b{color:var(--ink)}
-.chip{touch-action:none;user-select:none;-webkit-user-select:none;background:var(--chip);border:2px solid var(--chip-line);border-radius:12px;padding:.55rem .85rem;font-weight:800;font-size:1rem;cursor:grab;min-height:2.8rem;display:flex;align-items:center;max-width:100%}
-.chip.sel{outline:4px solid var(--accent);outline-offset:2px}
-.chip.dragging{opacity:.35}
+.tray-empty{color:var(--muted);text-align:center;width:100%;padding:2rem .75rem;line-height:1.55;font-size:.92rem}
+.tray-empty b{color:var(--ink);font-weight:600;display:block;margin-bottom:.15rem}
+.chip{touch-action:none;user-select:none;-webkit-user-select:none;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);padding:.5rem .8rem;font-weight:550;font-size:.95rem;cursor:grab;min-height:2.6rem;display:flex;align-items:center;max-width:100%;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.chip:hover{border-color:var(--faint)}
+.chip.sel{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.chip.dragging{opacity:.3}
 
-.stage{flex:1;display:flex;flex-direction:column;min-width:0;padding:1rem 1.2rem 1.2rem;gap:.8rem}
-.room{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;gap:.8rem}
-.room.flipped{flex-direction:column-reverse}
-.front{background:var(--front);color:#fff;border-radius:12px;padding:.55rem 2rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.9rem;text-align:center}
+.stage{flex:1;display:flex;flex-direction:column;min-width:0;padding:1.25rem;gap:.8rem}
 .gridwrap{flex:1;width:100%;display:flex;align-items:center;justify-content:center;min-height:0}
+.roombox{display:flex;flex-direction:column;gap:14px}
+.roombox.flipped{flex-direction:column-reverse}
+.front{display:flex;flex-direction:column;align-items:center;gap:.4rem;color:var(--muted);font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.front::before{content:"";display:block;width:60%;height:5px;border-radius:3px;background:var(--ink-2)}
+.roombox.flipped .front{flex-direction:column-reverse}
 .grid{display:grid;gap:var(--gap,10px)}
-.seat{touch-action:none;user-select:none;-webkit-user-select:none;width:var(--cw);height:var(--ch);border-radius:calc(var(--cw) * .1);background:var(--seat);border:2px solid var(--seat-line);display:flex;align-items:center;justify-content:center;text-align:center;padding:4%;font-weight:800;font-size:var(--fs);line-height:1.1;position:relative;transition:background .12s,border-color .12s,transform .1s;overflow:hidden;word-break:break-word;cursor:pointer}
-.seat.empty::after{content:"";width:28%;height:6%;border-radius:4px;background:var(--seat-line);opacity:.7}
-.seat.filled{background:var(--chip);border-color:var(--chip-line);cursor:grab}
-.seat.hot{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.04)}
-.seat.sel{outline:4px solid var(--accent);outline-offset:2px}
-.seat.target{border-style:dashed;border-color:var(--accent)}
-.seat.off{background:transparent;border:2px dashed transparent}
-.seat.off::after{display:none}
+.seat{touch-action:none;user-select:none;-webkit-user-select:none;width:var(--cw);height:var(--ch);border-radius:calc(var(--cw) * .07);background:transparent;border:1px dashed var(--line-2);display:flex;align-items:center;justify-content:center;text-align:center;padding:5%;font-weight:600;font-size:var(--fs);line-height:1.12;position:relative;transition:background .12s,border-color .12s,box-shadow .12s;overflow:hidden;word-break:break-word;cursor:pointer;color:var(--ink);letter-spacing:-.01em}
+.seat.empty:hover{background:rgba(255,255,255,.6)}
+.seat.filled{background:var(--surface);border:1px solid var(--line-2);box-shadow:0 1px 2px rgba(0,0,0,.05);cursor:grab}
+.seat.hot{border:2px solid var(--accent);background:var(--accent-soft)}
+.seat.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.seat.target{border-color:var(--accent-line);background:rgba(238,242,253,.6)}
+.seat.off{border-color:transparent;background:transparent;cursor:default}
 .editroom .seat{cursor:pointer}
-.editroom .seat.off{border-color:#cfc8b8}
-.editroom .seat:not(.off){background:#fff;border-color:var(--accent)}
+.editroom .seat:not(.off){background:var(--surface);border:1px solid var(--line-2)}
+.editroom .seat.off{border:1px dashed var(--line-2);background:transparent;cursor:pointer}
+.editroom .seat.off::after{content:"+";color:var(--faint);font-size:1.4em;font-weight:400}
 .seat .nm{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.seat .flag{position:absolute;top:4%;right:5%;font-size:.7em;opacity:.9}
-.seat.dragging{opacity:.35}
-.seat.locked{background:#e8eef7;border-color:#9fb4d3}
+.seat .flag{position:absolute;top:6%;right:6%;color:var(--accent);display:flex}
+.seat .flag svg{width:max(.6em,11px);height:max(.6em,11px);stroke-width:2.4}
+.seat.locked{background:#f7f9fe;border-color:var(--accent-line)}
 .lockmode .seat.filled{cursor:pointer}
-.lockmode .seat.empty{opacity:.5}
-.seat .flag{font-size:max(.55em,12px)}
+.lockmode .seat.empty{opacity:.45}
+.seat.dragging{opacity:.3}
+.seat.pop{animation:deal .3s both}
+@keyframes deal{from{opacity:0;transform:translateY(-6px)}}
+.hint{color:var(--muted);text-align:center;font-size:.88rem}
+.banner{display:flex;align-items:center;justify-content:center;gap:.75rem;flex-wrap:wrap;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);border-radius:var(--r);padding:.55rem 1rem;font-weight:550;font-size:.92rem;text-align:center}
 .print-head{display:none}
-.vopts{display:flex;flex-direction:column;gap:.7rem}
-.vopt{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--bg);border-radius:14px;padding:.6rem .6rem .6rem 1rem}
-.vopt b{display:block}.vopt small{color:var(--muted);font-size:.9rem}
-.seg{display:flex;background:#fff;border:2px solid var(--line);border-radius:12px;padding:3px;gap:3px;flex-shrink:0}
-.seg button{border:none;background:transparent;border-radius:9px;padding:.45rem .9rem;font-weight:800;min-height:2.5rem;color:var(--muted)}
-.seg button.on{background:var(--accent);color:#fff}
-.seat.pop{animation:deal .35s both}
-@keyframes deal{from{transform:scale(.6) translateY(-12px);opacity:0}}
-.hint{color:var(--muted);text-align:center;font-size:.95rem}
-.banner{background:var(--accent-soft);color:var(--accent);border:2px solid #bfe0d7;border-radius:12px;padding:.6rem 1rem;font-weight:700;text-align:center}
+.toolbar .md{display:none}
+.dragghost{position:fixed;left:0;top:0;pointer-events:none;z-index:1000;background:var(--surface);border:1px solid var(--accent);border-radius:var(--r);padding:.55rem .95rem;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,.16);transform:translate(-50%,-50%);font-size:1rem;white-space:nowrap}
 
-.dragghost{position:fixed;left:0;top:0;pointer-events:none;z-index:1000;background:var(--chip);border:2px solid var(--chip-line);border-radius:12px;padding:.6rem 1rem;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.2);transform:translate(-50%,-50%) rotate(-3deg);font-size:1.05rem;white-space:nowrap}
-
-/* Rules */
-.rules{flex:1;overflow:auto;padding:1.5rem clamp(1rem,3vw,3rem)}
-.rules-inner{max-width:1300px;margin:0 auto}
-.rules h2{font-size:1.6rem;margin:0 0 .3rem;font-weight:800}
-.rules .sub{color:var(--muted);margin:0 0 1.4rem}
-.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(20rem,1fr));gap:1.2rem}
-.rcard{background:var(--panel);border:2px solid var(--line);border-radius:var(--radius);padding:1.2rem;display:flex;flex-direction:column;gap:.8rem}
-.rcard h3{margin:0;font-size:1.2rem;font-weight:800;display:flex;align-items:center;gap:.5rem}
-.rcard p{margin:0;color:var(--muted);font-size:.95rem}
-.select{min-height:2.9rem;border:2px solid var(--line);border-radius:12px;padding:.3rem .6rem;background:#fff;font-size:1rem;flex:1;min-width:0}
-.select:focus{outline:none;border-color:var(--accent)}
-.rrow{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem;align-items:center}
+/* Requirements */
+.rules{flex:1;overflow:auto;padding:2rem clamp(1rem,3vw,3rem)}
+.rules-inner{max-width:1240px;margin:0 auto}
+.rules h2{font-size:1.5rem;margin:0 0 .3rem;font-weight:650;letter-spacing:-.02em}
+.rules .sub{color:var(--muted);margin:0 0 1.5rem;max-width:46rem;line-height:1.5}
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(19rem,1fr));gap:1rem}
+.rcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.2rem;display:flex;flex-direction:column;gap:.8rem}
+.rcard h3{margin:0;font-size:1.02rem;font-weight:600;display:flex;align-items:center;gap:.6rem}
+.rcard h3 .ic{width:2rem;height:2rem;border-radius:8px;background:var(--bg);display:grid;place-items:center;color:var(--ink-2)}
+.rcard p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.45}
+.select{min-height:2.75rem;border:1px solid var(--line-2);border-radius:var(--r);padding:.3rem .6rem;background:#fff;font-size:.95rem;min-width:0;width:100%}
+.select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.rrow{display:grid;grid-template-columns:1fr auto 1fr;gap:.45rem;align-items:center}
 .rrow .btn{grid-column:1/-1}
 .rrow.one{grid-template-columns:1fr auto}
 .rrow.one .btn{grid-column:auto}
-.rrow .and{color:var(--muted);font-weight:700}
-.rlist{display:flex;flex-direction:column;gap:.45rem}
-.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg);border-radius:12px;padding:.4rem .4rem .4rem .9rem;font-weight:700}
-.ritem.ok{background:var(--accent-soft)}
-.ritem.bad{background:var(--danger-soft)}
+.rrow .and{color:var(--faint);font-weight:500;font-size:.9rem}
+.rlist{display:flex;flex-direction:column;gap:.35rem;border-top:1px solid var(--line);padding-top:.8rem}
+.ritem{display:flex;align-items:center;gap:.6rem;border-radius:var(--r);padding:.3rem .3rem .3rem .75rem;font-weight:550;background:var(--bg);font-size:.95rem}
 .ritem .txt{flex:1}
-.ritem .st{font-size:.85rem;font-weight:800}
-.ritem.ok .st{color:var(--accent)}
+.ritem .sep2{color:var(--faint);font-weight:400;margin:0 .2rem}
+.ritem .st{font-size:.8rem;font-weight:600;display:inline-flex;align-items:center;gap:.25rem}
+.ritem.ok .st{color:var(--ok)}
 .ritem.bad .st{color:var(--danger)}
-.ritem .btn{min-height:2.4rem;width:2.4rem;padding:0}
-.rempty{color:var(--muted);font-style:italic;padding:.3rem 0}
-.rules-cta{margin:1.6rem 0 0;display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
-.rules-cta .btn{min-height:3.6rem;font-size:1.15rem;padding:.6rem 1.6rem}
+.rempty{color:var(--faint);font-size:.9rem;padding:.2rem 0}
+.rules-cta{margin:1.5rem 0 0;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.rules-cta .btn{min-height:3.25rem;font-size:1.02rem;padding:.6rem 1.5rem}
 
 /* Modal */
-.overlay{position:fixed;inset:0;background:rgba(25,32,35,.45);display:flex;align-items:center;justify-content:center;z-index:500;padding:1rem;animation:fade .15s}
-.modal{background:var(--panel);border-radius:20px;padding:1.6rem;width:min(44rem,100%);max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:1rem;animation:pop .18s}
-.modal h2{margin:0;font-size:1.5rem;font-weight:800}
-.modal p{margin:0;color:var(--muted)}
-.modal .foot{display:flex;justify-content:flex-end;gap:.6rem;flex-wrap:wrap;margin-top:.4rem}
-.modal label.lbl{font-weight:800;display:block;margin-bottom:.35rem}
-textarea.input{min-height:11rem;resize:vertical;width:100%;line-height:1.4}
+.overlay{position:fixed;inset:0;background:rgba(24,24,27,.38);display:flex;align-items:center;justify-content:center;z-index:500;padding:1rem;animation:fade .15s}
+.modal{background:var(--surface);border-radius:14px;padding:1.6rem;width:min(42rem,100%);max-height:92vh;overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,.2);display:flex;flex-direction:column;gap:1.1rem;animation:pop .16s}
+.modal h2{margin:0;font-size:1.3rem;font-weight:650;letter-spacing:-.015em}
+.modal p{margin:0;color:var(--muted);font-size:.93rem;line-height:1.5}
+.modal .foot{display:flex;justify-content:flex-end;gap:.5rem;flex-wrap:wrap;margin-top:.3rem}
+.modal label.lbl{font-weight:600;display:block;margin-bottom:.4rem;font-size:.92rem}
+textarea.input{min-height:11rem;resize:vertical;width:100%;line-height:1.45}
 @keyframes fade{from{opacity:0}}
-@keyframes pop{from{transform:scale(.96);opacity:0}}
+@keyframes pop{from{transform:translateY(6px);opacity:0}}
 
 .picker-wrap{display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start}
-.picker{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;padding:10px;background:var(--bg);border-radius:14px;touch-action:none;flex:1;min-width:15rem;max-width:24rem}
-.picker i{aspect-ratio:1;border-radius:4px;background:#fff;border:2px solid var(--line);cursor:pointer}
-.picker i.on{background:var(--accent-soft);border-color:var(--accent)}
-.steppers{display:flex;flex-direction:column;gap:.8rem}
+.picker{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;padding:8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;touch-action:none;flex:1;min-width:15rem;max-width:23rem}
+.picker i{aspect-ratio:1;border-radius:3px;background:#fff;border:1px solid var(--line-2);cursor:pointer}
+.picker i.on{background:var(--accent);border-color:var(--accent)}
+.steppers{display:flex;flex-direction:column;gap:.75rem}
 .stepper{display:flex;align-items:center;gap:.5rem}
-.stepper .lab{width:5.2rem;font-weight:800}
-.stepper .val{min-width:2.5ch;text-align:center;font-size:1.5rem;font-weight:800}
-.dims{font-size:1.1rem;font-weight:800;color:var(--accent)}
+.stepper .lab{width:6.5rem;font-weight:550;font-size:.92rem}
+.stepper .val{min-width:2.5ch;text-align:center;font-size:1.3rem;font-weight:650;font-variant-numeric:tabular-nums}
+.dims{font-weight:600;color:var(--accent)}
 
-.classlist{display:flex;flex-direction:column;gap:.4rem;max-height:50vh;overflow:auto}
+.classlist{display:flex;flex-direction:column;gap:.35rem;max-height:50vh;overflow:auto;padding:2px}
 .classlist .row{display:flex;gap:.4rem;align-items:center}
-.classlist .row .btn{min-height:2.6rem;width:2.6rem;padding:0}
-.classlist .row .input{min-height:2.6rem}
+.classlist .row .input{min-height:2.5rem}
 
-.toast{position:fixed;left:50%;top:1rem;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.8rem 1.4rem;border-radius:14px;font-weight:700;z-index:900;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:pop .2s;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;top:1rem;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.7rem 1.2rem;border-radius:10px;font-weight:550;font-size:.95rem;z-index:900;box-shadow:0 10px 30px rgba(0,0,0,.2);animation:pop .18s;max-width:90vw;text-align:center}
 
+@media (max-width: 1500px){
+  .toolbar .xl{display:none}
+  .toolbar .md{display:inline}
+  .toolbar .sep{display:none}
+}
 @media (max-width: 760px){
   .editor{flex-direction:column}
-  .side{width:100%;border-right:none;border-bottom:2px solid var(--line);max-height:40vh}
+  .side{width:100%;border-right:none;border-bottom:1px solid var(--line);max-height:40vh}
   .stage{min-height:60vh}
   .plan-title{max-width:60vw}
   .toolbar .sep{display:none}
 }
 @media print{
+  @page{size:landscape;margin:12mm}
   body{background:#fff}
-  .topbar .btn,.tabs,.toolbar,.side,.hint,.banner,.toast{display:none!important}
-  .topbar{border:none}
+  .topbar,.tabs,.toolbar,.side,.hint,.banner,.toast{display:none!important}
   .stage{padding:0}
-  .seat{border-color:#999!important;background:#fff!important}
+  .seat{border:1px solid #888!important;background:#fff!important;box-shadow:none!important;color:#000}
+  .seat.empty{border:1px dashed #bbb!important}
   .seat.off{border:none!important}
-  .front{background:#fff;color:#000;border:2px solid #000}
-  .topbar{display:none!important}
-  .print-head{display:flex!important;justify-content:space-between;align-items:baseline;font-size:20pt;font-weight:800;margin-bottom:10px}
-  .print-head small{font-size:12pt;font-weight:600;color:#555}
-  .seat.locked{background:#fff!important}
   .seat .flag{display:none}
+  .print-head{display:flex!important;justify-content:space-between;align-items:baseline;font-size:18pt;font-weight:650;margin-bottom:8px;border-bottom:1px solid #000;padding-bottom:6px}
+  .print-head small{font-size:10pt;font-weight:500;color:#555}
 }
 </style>
 </head>
@@ -237,8 +247,6 @@ function newPlan(name, rows, cols, students){
 /* ---------- Helpers ---------- */
 function seatOf(p, sid){ for(const k in p.seats) if(p.seats[k] === sid) return +k; return null; }
 function nameOf(p, sid){ const s = p.students.find(s => s.id === sid); return s ? s.name : "?"; }
-function shortName(n){ const w = n.trim().split(/\s+/); return w.length>1 ? w[0]+" "+w[w.length-1][0].toUpperCase()+"." : n; }
-function deskName(p, sid){ const n = nameOf(p,sid); return p.short ? shortName(n) : n; }
 function seatOrder(p){ // front row first, left to right
   const out = []; for(let r=0;r<p.rows;r++) for(let c=0;c<p.cols;c++){ const i=r*p.cols+c; if(!p.off.includes(i)) out.push(i); } return out;
 }
@@ -314,7 +322,7 @@ function randomArrange(p){
   ids.slice(0, order.length).forEach((id,i) => p.seats[order[i]] = id);
   touch(p);
   const left = ids.length - order.length;
-  toast(left>0 ? `Shuffled! ${left} student${left>1?"s":""} didn't fit – add more desks` : "Shuffled! 🎲");
+  toast(left>0 ? `Shuffled. ${left} student${left>1?"s":""} didn't fit – add more desks.` : "Shuffled");
 }
 function scoreLayout(p, pos){ // pos: Map sid -> seat
   let s = 0;
@@ -366,7 +374,7 @@ function smartArrange(p){
   touch(p);
   const st = ruleStatus(p);
   if(st.total===0) toast("Shuffled! (No requirements set yet)");
-  else if(st.met===st.total) toast(st.total===1 ? "Requirement met ✓" : `All ${st.total} requirements met ✓`);
+  else if(st.met===st.total) toast(st.total===1 ? "Requirement met" : `All ${st.total} requirements met`);
   else toast(`${st.met} of ${st.total} requirements met – the rest weren't possible`);
 }
 
@@ -376,56 +384,107 @@ function render(){
   if(state.view === "editor" && plan()) renderEditor(); else { state.view="home"; renderHome(); }
 }
 
+/* ---------- Icons (line icons, Lucide-style) ---------- */
+const ICONS = {
+  shuffle:'<path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-7.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/>',
+  checks:'<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+  undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  clear:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  grid:'<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+  lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  flip:'<path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>',
+  print:'<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
+  max:'<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>',
+  min:'<path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>',
+  back:'<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  minus:'<path d="M5 12h14"/>',
+  paste:'<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
+  edit:'<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>',
+  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
+  trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  copy:'<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  together:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  apart:'<path d="m18 8 4 4-4 4"/><path d="M2 12h20"/><path d="m6 8-4 4 4 4"/>',
+  front:'<path d="M5 3h14"/><path d="m18 13-6-6-6 6"/><path d="M12 7v14"/>',
+};
+const I = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+
+/* ---------- Names ---------- */
+function displayName(p, sid){
+  const n = nameOf(p, sid);
+  if(p.names !== "first") return n;
+  const first = n.trim().split(/\s+/)[0];
+  // if two students share a first name, add a surname initial so they can be told apart
+  const clash = p.students.some(s => s.id !== sid && s.name.trim().split(/\s+/)[0].toLowerCase() === first.toLowerCase());
+  const w = n.trim().split(/\s+/);
+  return clash && w.length > 1 ? `${first} ${w[w.length-1][0].toUpperCase()}.` : first;
+}
+
 function miniGrid(p){
   const cells=[]; for(let i=0;i<p.rows*p.cols;i++){ const cls = p.off.includes(i) ? "x" : (p.seats[i] ? "f" : ""); cells.push(`<i class="${cls}"></i>`); }
   return `<div class="mini" style="grid-template-columns:repeat(${p.cols},1fr);grid-template-rows:repeat(${p.rows},1fr)">${cells.join("")}</div>`;
 }
 function when(t){
   const d = new Date(t), now = new Date();
-  if(d.toDateString()===now.toDateString()) return "Today, " + d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
-  return d.toLocaleDateString([], {day:"numeric",month:"short",year: d.getFullYear()===now.getFullYear()?undefined:"numeric"});
+  if(d.toDateString()===now.toDateString()) return "Edited today " + d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  return "Edited " + d.toLocaleDateString([], {day:"numeric",month:"short",year: d.getFullYear()===now.getFullYear()?undefined:"numeric"});
 }
+const LOGO = `<span class="logo"><i></i><i></i><i></i><i></i><i></i><i></i></span>`;
 
 function renderHome(){
+  const has = store.plans.length > 0;
   app.innerHTML = `
-  <header class="topbar"><div class="brand"><span class="logo"><i></i><i></i><i></i><i></i></span>Seating Plans</div></header>
+  <header class="topbar"><div class="brand">${LOGO}Seating Plans</div></header>
   <main class="home">
-    <h1>Your seating plans</h1>
-    <p class="sub">${store.plans.length ? "Tap a plan to open it, or make a new one." : "Make your first plan: pick the room size, add your class, and drag them onto seats."}</p>
-    <div class="cards">
-      <div class="card new" data-act="new"><div class="plus">+</div>New seating plan</div>
+    <div class="home-head">
+      <div><h1>Seating plans</h1><p class="sub">${has ? `${store.plans.length} saved plan${store.plans.length>1?"s":""}` : "Nothing here yet."}</p></div>
+      ${has ? `<button class="btn primary" data-act="new">${I("plus")}New plan</button>` : ""}
+    </div>
+    ${has ? `<div class="cards">
       ${store.plans.map(p => `
         <div class="card" data-open="${p.id}">
           ${miniGrid(p)}
-          <h3>${esc(p.name)}</h3>
-          <div class="meta">${p.students.length} students · ${p.rows}×${p.cols} room · ${when(p.updated)}</div>
+          <div><h3>${esc(p.name)}</h3>
+          <div class="meta">${p.students.length} student${p.students.length===1?"":"s"} · ${p.rows} × ${p.cols}</div>
+          <div class="meta">${when(p.updated)}</div></div>
           <div class="actions">
-            <button class="btn" data-dup="${p.id}">Copy</button>
-            <button class="btn danger" data-del="${p.id}">Delete</button>
+            <button class="btn sm" data-dup="${p.id}">${I("copy")}Duplicate</button>
+            <button class="btn sm iconbtn danger" data-del="${p.id}" title="Delete" aria-label="Delete ${esc(p.name)}">${I("trash")}</button>
           </div>
         </div>`).join("")}
-    </div>
+    </div>` : `
+    <div class="empty-home">
+      <h2>Create your first seating plan</h2>
+      <p>Choose the room size, add your class, then drag students onto desks or shuffle them.</p>
+      <button class="btn primary" data-act="new">${I("plus")}New plan</button>
+    </div>`}
     <div class="home-foot">
-      <button class="btn" data-act="export">⬇ Back up all plans</button>
-      <button class="btn" data-act="import">⬆ Restore from backup</button>
+      <span style="flex:1;min-width:14rem">Plans are saved in this browser. Back up to move them to another device.</span>
+      <button class="btn sm" data-act="export" ${has?"":"disabled"}>${I("download")}Back up</button>
+      <button class="btn sm" data-act="import">${I("upload")}Restore</button>
     </div>
-    <p class="sub" style="margin-top:1rem;font-size:.9rem">Plans are saved in this browser on this device. Use “Back up” to move them to another computer.</p>
   </main>`;
 }
 
 function renderEditor(){
   const p = plan(); cleanSeats(p);
+  if(p.short && !p.names){ p.names = "first"; delete p.short; }
   const seated = new Set(Object.values(p.seats));
   const waiting = p.students.filter(s => !seated.has(s.id));
   const st = ruleStatus(p);
   app.innerHTML = `
   <header class="topbar">
-    <button class="btn ghost" data-act="home">← All plans</button>
+    <button class="btn ghost" data-act="home">${I("back")}All plans</button>
     <input class="plan-title" id="title" value="${esc(p.name)}" aria-label="Plan name">
     <div class="spacer"></div>
     <div class="tabs">
       <button class="tab ${state.tab==="seats"?"active":""}" data-tab="seats">Seating</button>
-      <button class="tab ${state.tab==="rules"?"active":""}" data-tab="rules">Set with requirements${st.total?` (${st.total})`:""}</button>
+      <button class="tab ${state.tab==="rules"?"active":""}" data-tab="rules">Requirements${st.total?`<span class="badge">${st.total}</span>`:""}</button>
     </div>
   </header>
   ${state.tab==="seats" ? seatsView(p, waiting, st) : rulesView(p, st)}`;
@@ -438,113 +497,119 @@ function seatsView(p, waiting, st){
   const idxs=[]; for(let r=0;r<p.rows;r++) for(let c=0;c<p.cols;c++) idxs.push(r*p.cols+c);
   if(state.flipped) idxs.reverse();
   const locked = new Set(p.locked);
+  const order = seatOrder(p);
   for(const i of idxs){
     const off = p.off.includes(i), sid = p.seats[i];
     if(off) cells.push(`<div class="seat off" data-seat="${i}"></div>`);
-    else if(sid) cells.push(`<div class="seat filled ${locked.has(i)?"locked":""} ${state.selected===sid?"sel":""} ${state.anim?"pop":""}" style="${state.anim?`animation-delay:${(seatOrder(p).indexOf(i)*18)}ms`:""}" data-seat="${i}" data-sid="${sid}"><span class="nm">${esc(deskName(p,sid))}</span>${locked.has(i)?`<span class="flag">🔒</span>`:""}</div>`);
+    else if(sid) cells.push(`<div class="seat filled ${locked.has(i)?"locked":""} ${state.selected===sid?"sel":""} ${state.anim?"pop":""}" style="${state.anim?`animation-delay:${order.indexOf(i)*15}ms`:""}" data-seat="${i}" data-sid="${sid}" title="${esc(nameOf(p,sid))}"><span class="nm">${esc(displayName(p,sid))}</span>${locked.has(i)?`<span class="flag">${I("lock")}</span>`:""}</div>`);
     else cells.push(`<div class="seat empty ${state.selected?"target":""}" data-seat="${i}"></div>`);
   }
-  const nSeats = seatOrder(p).length;
+  const fs = !!document.fullscreenElement;
   return `
   <div class="toolbar">
-    <button class="btn primary" data-act="random"><span class="ico">🎲</span>Random</button>
-    <button class="btn" data-act="smart"><span class="ico">✨</span>With requirements</button>
+    <button class="btn primary" data-act="random">${I("shuffle")}Shuffle</button>
+    <button class="btn" data-act="smart">${I("checks")}<span class="xl">Shuffle with requirements</span><span class="md">With requirements</span></button>
     <span class="sep"></span>
-    <button class="btn" data-act="undo" ${state.undo.length?"":"disabled"}><span class="ico">↶</span>Undo</button>
-    <button class="btn" data-act="clear"><span class="ico">⟲</span>Clear seats</button>
+    <button class="btn iconbtn" data-act="undo" ${state.undo.length?"":"disabled"} title="Undo" aria-label="Undo">${I("undo")}</button>
+    <button class="btn" data-act="clear">${I("clear")}Clear</button>
     <span class="sep"></span>
-    <button class="btn ${state.editRoom?"on":""}" data-act="editroom"><span class="ico">▦</span>${state.editRoom?"Done editing":"Edit room"}</button>
-    <button class="btn ${state.lockMode?"on":""}" data-act="lockmode" title="Lock students to their desks so shuffling leaves them there"><span class="ico">🔒</span>${state.lockMode?"Done locking":"Lock desks"}</button>
+    <button class="btn ${state.editRoom?"on":""}" data-act="editroom">${I("grid")}${state.editRoom?"Done":"Edit room"}</button>
+    <button class="btn ${state.lockMode?"on":""}" data-act="lockmode" title="Lock students to their desks so shuffling leaves them there">${I("lock")}${state.lockMode?"Done":"Lock"}</button>
     <span class="spacer"></span>
-    <button class="btn" data-act="view"><span class="ico">⚙</span>View</button>
-    <button class="btn" data-act="full" title="Full screen"><span class="ico">⛶</span>${document.fullscreenElement?"Exit full screen":"Full screen"}</button>
+    <div class="seg" role="group" aria-label="Names on desks">
+      <button data-names="full" class="${p.names!=="first"?"on":""}">Full names</button>
+      <button data-names="first" class="${p.names==="first"?"on":""}">First names</button>
+    </div>
+    <button class="btn iconbtn" data-act="flip" title="${state.flipped?"Put the board at the top":"Put the board at the bottom (teacher's view)"}" aria-label="Flip view">${I("flip")}</button>
+    <button class="btn iconbtn" data-act="print" title="Print" aria-label="Print">${I("print")}</button>
+    <button class="btn iconbtn" data-act="full" title="${fs?"Exit full screen":"Full screen"}" aria-label="Full screen">${I(fs?"min":"max")}</button>
   </div>
   <div class="editor">
     <aside class="side">
       <div class="side-head">
-        <h2>Students</h2><span class="count" style="margin-top:-.4rem">${p.students.length - waiting.length}/${p.students.length} seated · ${nSeats} desks</span>
+        <h2>Students <span class="count">${p.students.length - waiting.length} of ${p.students.length} seated · ${order.length} desks</span></h2>
         <form class="addrow" id="addform">
-          <input class="input" id="addname" placeholder="Type a name…" autocomplete="off">
-          <button class="btn primary iconbtn" title="Add student" aria-label="Add student">+</button>
+          <input class="input" id="addname" placeholder="Add a student" autocomplete="off">
+          <button class="btn primary iconbtn" title="Add student" aria-label="Add student">${I("plus")}</button>
         </form>
         <div class="addrow">
-          <button class="btn" style="flex:1" data-act="paste">📋 Paste list / CSV</button>
-          <button class="btn" data-act="classlist" title="Rename or remove students">✎ Edit</button>
+          <button class="btn" style="flex:1" data-act="paste">${I("paste")}Paste list or CSV</button>
+          <button class="btn iconbtn" data-act="classlist" title="Rename or remove students" aria-label="Edit class list">${I("edit")}</button>
         </div>
       </div>
       <div class="tray" id="tray">
-        ${waiting.length ? waiting.map(s => `<div class="chip ${state.selected===s.id?"sel":""}" data-sid="${s.id}">${esc(s.name)}</div>`).join("")
-          : `<div class="tray-empty">${p.students.length ? "<b>Everyone has a seat!</b><br>Drag a student here to take them off their seat." : "<b>No students yet.</b><br>Type names above, or paste your class list."}</div>`}
+        ${waiting.length ? waiting.map(s => `<div class="chip ${state.selected===s.id?"sel":""}" data-sid="${s.id}" title="${esc(s.name)}">${esc(displayName(p,s.id))}</div>`).join("")
+          : `<div class="tray-empty">${p.students.length ? "<b>Everyone is seated</b>Drag a student here to take them off their desk." : "<b>No students yet</b>Type a name above, or paste your class list."}</div>`}
       </div>
     </aside>
     <section class="stage">
       <div class="print-head">${esc(p.name)} <small>${new Date().toLocaleDateString([], {weekday:"long",day:"numeric",month:"long",year:"numeric"})}</small></div>
-      ${state.editRoom ? `<div class="banner">Tap squares to add or remove desks. Gaps make aisles. Change the size: <button class="btn" data-act="resize" style="min-height:2.4rem;margin-left:.4rem">Room size ${p.rows}×${p.cols}</button></div>` : ""}
-      <div class="room ${state.flipped?"flipped":""}">
-        <div class="front">Front of class · Board</div>
-        <div class="gridwrap" id="gridwrap">
+      ${state.editRoom ? `<div class="banner">Tap a desk to remove it and make an aisle. Tap a gap to put a desk back. <button class="btn sm" data-act="resize">Room size: ${p.rows} × ${p.cols}</button></div>` : ""}
+      ${state.lockMode ? `<div class="banner">Tap a student's desk to lock or unlock it. Locked students stay put when you shuffle.</div>` : ""}
+      <div class="gridwrap" id="gridwrap">
+        <div class="roombox ${state.flipped?"flipped":""}">
+          <div class="front" id="front">Front of room</div>
           <div class="grid ${state.editRoom?"editroom":""} ${state.lockMode?"lockmode":""}" id="grid" style="grid-template-columns:repeat(${p.cols},auto)">${cells.join("")}</div>
         </div>
       </div>
-      ${state.lockMode ? `<div class="banner">Tap a student's desk to lock or unlock it. Locked students stay put when you shuffle.</div>` : ""}
-      ${!state.editRoom && !state.lockMode ? `<div class="hint">${state.selected ? `Now tap a desk to seat <b>${esc(nameOf(p,state.selected))}</b> (or tap them again to cancel)` : "Drag names onto desks — or tap a name, then tap a desk. Drop on a filled desk to swap."}</div>` : ""}
+      ${!state.editRoom && !state.lockMode ? `<div class="hint">${state.selected ? `Tap a desk to seat <b>${esc(nameOf(p,state.selected))}</b>, or tap them again to cancel.` : "Drag students onto desks, or tap a student and then a desk. Drop onto someone to swap."}</div>` : ""}
     </section>
   </div>`;
 }
 
 function opts(p, sel){
-  return `<option value="">Choose…</option>` + p.students.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(s=>`<option value="${s.id}" ${sel===s.id?"selected":""}>${esc(s.name)}</option>`).join("");
+  return `<option value="">Select…</option>` + p.students.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(s=>`<option value="${s.id}" ${sel===s.id?"selected":""}>${esc(s.name)}</option>`).join("");
 }
 function rulesView(p, st){
   const hasSeats = Object.keys(p.seats).length>0;
-  const item = (txt, ok, kind, i) => `<div class="ritem ${hasSeats?(ok?"ok":"bad"):""}"><span class="txt">${txt}</span>${hasSeats?`<span class="st">${ok?"✓ met":"✗ not met"}</span>`:""}<button class="btn ghost" data-rm="${kind}:${i}" aria-label="Remove">✕</button></div>`;
+  const item = (txt, ok, kind, i) => `<div class="ritem ${hasSeats?(ok?"ok":"bad"):""}"><span class="txt">${txt}</span>${hasSeats?`<span class="st">${ok?I("check")+"Met":I("x")+"Not met"}</span>`:""}<button class="btn sm iconbtn ghost" data-rm="${kind}:${i}" aria-label="Remove" title="Remove">${I("x")}</button></div>`;
   const nm = id => esc(nameOf(p,id));
   const disabled = p.students.length<2 ? "disabled" : "";
   return `
   <div class="rules"><div class="rules-inner">
-    <h2>Set with requirements</h2>
-    <p class="sub">Tell the planner who should sit together, who should be kept apart, and who needs to be near the front. Then press the big button — it'll meet as many as it can.</p>
+    <h2>Requirements</h2>
+    <p class="sub">Choose who should sit together, who should be kept apart, and who needs to be near the front. The planner will meet as many as the room allows.</p>
     ${p.students.length<2?`<div class="banner" style="margin-bottom:1.2rem">Add at least two students on the Seating tab first.</div>`:""}
     <div class="rule-grid">
       <div class="rcard">
-        <h3>🤝 Sit next to each other</h3>
-        <p>These two will be put side by side in the same row.</p>
-        <div class="rrow"><select class="select" id="ta" ${disabled}>${opts(p)}</select><span class="and">&amp;</span><select class="select" id="tb" ${disabled}>${opts(p)}</select><button class="btn primary" data-add="together" ${disabled}>Add</button></div>
-        <div class="rlist">${p.together.length ? p.together.map((r,i)=>item(`${nm(r[0])} &amp; ${nm(r[1])}`, st.t[i], "together", i)).join("") : `<div class="rempty">None yet</div>`}</div>
+        <h3><span class="ic">${I("together")}</span>Sit together</h3>
+        <p>Placed side by side in the same row.</p>
+        <div class="rrow"><select class="select" id="ta" ${disabled}>${opts(p)}</select><span class="and">and</span><select class="select" id="tb" ${disabled}>${opts(p)}</select><button class="btn" data-add="together" ${disabled}>${I("plus")}Add pair</button></div>
+        <div class="rlist">${p.together.length ? p.together.map((r,i)=>item(`${nm(r[0])}<span class="sep2">&amp;</span>${nm(r[1])}`, st.t[i], "together", i)).join("") : `<div class="rempty">No pairs yet</div>`}</div>
       </div>
       <div class="rcard">
-        <h3>✋ Keep apart</h3>
-        <p>These two won't be put next to each other.</p>
-        <div class="rrow"><select class="select" id="aa" ${disabled}>${opts(p)}</select><span class="and">&amp;</span><select class="select" id="ab" ${disabled}>${opts(p)}</select><button class="btn primary" data-add="apart" ${disabled}>Add</button></div>
-        <div class="rlist">${p.apart.length ? p.apart.map((r,i)=>item(`${nm(r[0])} ✕ ${nm(r[1])}`, st.ap[i], "apart", i)).join("") : `<div class="rempty">None yet</div>`}</div>
+        <h3><span class="ic">${I("apart")}</span>Keep apart</h3>
+        <p>Never placed next to each other.</p>
+        <div class="rrow"><select class="select" id="aa" ${disabled}>${opts(p)}</select><span class="and">and</span><select class="select" id="ab" ${disabled}>${opts(p)}</select><button class="btn" data-add="apart" ${disabled}>${I("plus")}Add pair</button></div>
+        <div class="rlist">${p.apart.length ? p.apart.map((r,i)=>item(`${nm(r[0])}<span class="sep2">/</span>${nm(r[1])}`, st.ap[i], "apart", i)).join("") : `<div class="rempty">No pairs yet</div>`}</div>
       </div>
       <div class="rcard">
-        <h3>👀 Near the front</h3>
-        <p>For students who need to see the board — they'll get the front row.</p>
-        <div class="rrow one"><select class="select" id="fa" ${p.students.length?"":"disabled"}>${opts(p)}</select><button class="btn primary" data-add="front" ${p.students.length?"":"disabled"}>Add</button></div>
-        <div class="rlist">${p.front.length ? p.front.map((id,i)=>item(nm(id), st.f[i], "front", i)).join("") : `<div class="rempty">None yet</div>`}</div>
+        <h3><span class="ic">${I("front")}</span>Near the front</h3>
+        <p>Given a desk in the front row.</p>
+        <div class="rrow one"><select class="select" id="fa" ${p.students.length?"":"disabled"}>${opts(p)}</select><button class="btn" data-add="front" ${p.students.length?"":"disabled"}>${I("plus")}Add</button></div>
+        <div class="rlist">${p.front.length ? p.front.map((id,i)=>item(nm(id), st.f[i], "front", i)).join("") : `<div class="rempty">No students yet</div>`}</div>
       </div>
     </div>
     <div class="rules-cta">
-      <button class="btn primary" data-act="smartgo"><span class="ico">✨</span>Arrange seats using these requirements</button>
-      ${hasSeats && st.total ? `<span class="count" style="font-size:1rem">Current plan meets ${st.met} of ${st.total}</span>`:""}
+      <button class="btn primary" data-act="smartgo">${I("shuffle")}Shuffle with these requirements</button>
+      ${hasSeats && st.total ? `<span class="count" style="font-size:.95rem">The current layout meets ${st.met} of ${st.total}.</span>`:""}
     </div>
   </div></div>`;
 }
 
 /* Fit desks to the available space */
 function layoutGrid(){
-  const p = plan(), wrap = document.getElementById("gridwrap"), grid = document.getElementById("grid");
+  const p = plan(), wrap = document.getElementById("gridwrap"), grid = document.getElementById("grid"), front = document.getElementById("front");
   if(!wrap || !grid) return;
-  const W = wrap.clientWidth, H = wrap.clientHeight || window.innerHeight*0.6;
-  const gap = Math.max(6, Math.min(16, W/p.cols*0.08));
+  const W = wrap.clientWidth, H = (wrap.clientHeight || window.innerHeight*0.6) - (front ? front.offsetHeight + 14 : 0);
+  const gap = Math.max(6, Math.min(14, W/p.cols*0.07));
   let cw = (W - gap*(p.cols-1)) / p.cols;
   let ch = (H - gap*(p.rows-1)) / p.rows;
-  ch = Math.min(ch, cw*0.72); cw = Math.min(cw, ch/0.55, 260); ch = Math.min(ch, cw*0.72);
+  ch = Math.min(ch, cw*0.68); cw = Math.min(cw, ch/0.5, 250); ch = Math.min(ch, cw*0.68);
   grid.style.setProperty("--cw", cw+"px");
   grid.style.setProperty("--ch", ch+"px");
   grid.style.setProperty("--gap", gap+"px");
-  grid.style.setProperty("--fs", Math.max(11, Math.min(cw*0.15, ch*0.27, 30))+"px");
+  grid.style.setProperty("--fs", Math.max(11, Math.min(cw*0.14, ch*0.25, 28))+"px");
 }
 document.addEventListener("fullscreenchange", () => { if(state.view==="editor") render(); });
 window.addEventListener("resize", () => { if(state.view==="editor" && state.tab==="seats") layoutGrid(); });
@@ -583,12 +648,12 @@ function sizeModal(opts){
     ${opts.withName?`<div><label class="lbl" for="pn">Name</label><input class="input" id="pn" style="width:100%" value="${esc(opts.name||"")}" placeholder="e.g. 9B Maths"></div>`:""}
     <div>
       <label class="lbl">Room size — <span class="dims" id="dims"></span></label>
-      <p style="margin-bottom:.6rem">Tap the grid like inserting a table, or use the + and − buttons. (Rows go back from the board.)</p>
+      <p style="margin:-.2rem 0 .7rem">Drag across the grid, or use the buttons. Rows count back from the board.</p>
       <div class="picker-wrap">
         <div class="picker" id="picker">${Array.from({length:120},(_,i)=>`<i data-r="${Math.floor(i/12)+1}" data-c="${i%12+1}"></i>`).join("")}</div>
         <div class="steppers">
-          <div class="stepper"><span class="lab">Rows</span><button class="btn iconbtn" data-st="r-">−</button><span class="val" id="rv"></span><button class="btn iconbtn" data-st="r+">+</button></div>
-          <div class="stepper"><span class="lab">Desks per row</span><button class="btn iconbtn" data-st="c-">−</button><span class="val" id="cv"></span><button class="btn iconbtn" data-st="c+">+</button></div>
+          <div class="stepper"><span class="lab">Rows</span><button class="btn iconbtn" data-st="r-" aria-label="Fewer rows">${I("minus")}</button><span class="val" id="rv"></span><button class="btn iconbtn" data-st="r+" aria-label="More rows">${I("plus")}</button></div>
+          <div class="stepper"><span class="lab">Desks per row</span><button class="btn iconbtn" data-st="c-" aria-label="Fewer desks per row">${I("minus")}</button><span class="val" id="cv"></span><button class="btn iconbtn" data-st="c+" aria-label="More desks per row">${I("plus")}</button></div>
         </div>
       </div>
     </div>
@@ -622,7 +687,7 @@ function pasteModal(){
     <h2>Add your class list</h2>
     <p>Paste names below — one per line, separated by commas, or straight from a spreadsheet. You can also open a CSV file.</p>
     <textarea class="input" id="pt" placeholder="Amelia Jones&#10;Ben Carter&#10;Chloe Patel&#10;…"></textarea>
-    <div class="addrow" style="align-items:center"><label class="btn" style="cursor:pointer">📂 Open CSV file<input type="file" id="pf" accept=".csv,.txt,.tsv,text/csv,text/plain" hidden></label><span class="count" id="pc" style="font-size:1rem"></span></div>
+    <div class="addrow" style="align-items:center"><label class="btn" style="cursor:pointer">${I("file")}Open a CSV file<input type="file" id="pf" accept=".csv,.txt,.tsv,text/csv,text/plain" hidden></label><span class="count" id="pc" style="font-size:1rem"></span></div>
     <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="ok" disabled>Add students</button></div>`,
   (m,close)=>{
     const ta=m.querySelector("#pt"), pc=m.querySelector("#pc"), ok=m.querySelector("#ok");
@@ -643,8 +708,8 @@ function pasteModal(){
 
 function classListModal(){
   const p=plan();
-  const rowsHtml=()=>p.students.length ? p.students.map(s=>`<div class="row"><input class="input" data-rn="${s.id}" value="${esc(s.name)}"><button class="btn danger" data-rs="${s.id}" aria-label="Remove ${esc(s.name)}">✕</button></div>`).join("") : `<p>No students yet.</p>`;
-  modal(`<h2>Class list (${p.students.length})</h2><p>Change a name by typing over it, or remove a student with ✕.</p>
+  const rowsHtml=()=>p.students.length ? p.students.map(s=>`<div class="row"><input class="input" data-rn="${s.id}" value="${esc(s.name)}"><button class="btn iconbtn danger" data-rs="${s.id}" aria-label="Remove ${esc(s.name)}">${I("trash")}</button></div>`).join("") : `<p>No students yet.</p>`;
+  modal(`<h2>Class list (${p.students.length})</h2><p>Change a name by typing over it, or remove a student.</p>
     <div class="classlist" id="cl">${rowsHtml()}</div>
     <div class="foot">${p.students.length?`<button class="btn danger" id="rmall" style="margin-right:auto">Remove everyone</button>`:""}<button class="btn primary" data-close>Done</button></div>`,
   (m,close)=>{
@@ -660,37 +725,13 @@ function classListModal(){
   });
 }
 
-function viewModal(){
-  const p=plan();
-  modal(`<h2>View</h2>
-    <div class="vopts">
-      <div class="vopt"><div><b>Names on desks</b><small>Short names fit better on small desks</small></div>
-        <div class="seg"><button data-v="full" class="${p.short?"":"on"}">Amelia Jones</button><button data-v="short" class="${p.short?"on":""}">Amelia J.</button></div></div>
-      <div class="vopt"><div><b>Board position</b><small>Bottom = how you see it from the front</small></div>
-        <div class="seg"><button data-v="top" class="${state.flipped?"":"on"}">Top</button><button data-v="bottom" class="${state.flipped?"on":""}">Bottom</button></div></div>
-      <div class="vopt"><div><b>Print or save as PDF</b><small>Prints the room with the class name and date</small></div>
-        <button class="btn" data-v="print">🖨 Print</button></div>
-    </div>
-    <div class="foot"><button class="btn primary" data-close>Done</button></div>`,
-  (m,close)=>{
-    m.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{
-      const v=b.dataset.v;
-      if(v==="print"){ close(); setTimeout(()=>window.print(),100); return; }
-      if(v==="full"||v==="short"){ p.short = v==="short"; touch(p); }
-      if(v==="top"||v==="bottom") state.flipped = v==="bottom";
-      b.parentNode.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b));
-      render();
-    });
-  });
-}
-
 /* ---------- Actions ---------- */
 function openPlan(id){ state.view="editor"; state.planId=id; state.tab="seats"; state.selected=null; state.editRoom=false; state.undo=[]; render(); }
 
 function place(p, sid, seat){
   if(p.off.includes(seat)) return;
   const lk = p.locked||[];
-  if(lk.includes(seatOf(p,sid)) || (p.seats[seat] && p.seats[seat]!==sid && lk.includes(seat))){ toast("That desk is locked 🔒 — use Lock desks to unlock it"); return; }
+  if(lk.includes(seatOf(p,sid)) || (p.seats[seat] && p.seats[seat]!==sid && lk.includes(seat))){ toast("That desk is locked. Use Lock to unlock it."); return; }
   pushUndo(p);
   const cur=seatOf(p,sid), occ=p.seats[seat];
   if(occ===sid) { state.undo.pop(); return; }
@@ -699,16 +740,17 @@ function place(p, sid, seat){
   p.seats[seat]=sid;
   touch(p);
 }
-function unseat(p, sid){ const cur=seatOf(p,sid); if(cur!=null && (p.locked||[]).includes(cur)){ toast("That desk is locked 🔒"); return; } if(cur!=null){ pushUndo(p); delete p.seats[cur]; touch(p); } }
+function unseat(p, sid){ const cur=seatOf(p,sid); if(cur!=null && (p.locked||[]).includes(cur)){ toast("That desk is locked"); return; } if(cur!=null){ pushUndo(p); delete p.seats[cur]; touch(p); } }
 
 app.addEventListener("click", e=>{
   if(justDragged){ justDragged=false; return; }
-  const t=e.target.closest("[data-act],[data-open],[data-dup],[data-del],[data-tab],[data-add],[data-rm],.seat,.chip,.tray");
+  const t=e.target.closest("[data-names],[data-act],[data-open],[data-dup],[data-del],[data-tab],[data-add],[data-rm],.seat,.chip,.tray");
   if(!t) return;
   const p=plan();
   if(t.dataset.dup){ e.stopPropagation(); const src=store.plans.find(x=>x.id===t.dataset.dup); const c=JSON.parse(JSON.stringify(src)); c.id=uid(); c.name=src.name+" (copy)"; c.updated=Date.now(); store.plans.unshift(c); save(); render(); toast("Plan copied"); return; }
   if(t.dataset.del){ e.stopPropagation(); const src=store.plans.find(x=>x.id===t.dataset.del); confirmBox("Delete this plan?",`“${esc(src.name)}” will be gone for good.`,"Delete",()=>{ store.plans=store.plans.filter(x=>x!==src); save(); render(); }); return; }
   if(t.dataset.open){ openPlan(t.dataset.open); return; }
+  if(t.dataset.names){ p.names=t.dataset.names; touch(p); render(); return; }
   if(t.dataset.tab){ state.tab=t.dataset.tab; state.selected=null; render(); return; }
   if(t.dataset.add){
     const k=t.dataset.add;
@@ -745,7 +787,6 @@ app.addEventListener("click", e=>{
       case "clear": if(!Object.keys(p.seats).length) return toast("No one is seated yet"); pushUndo(p); { const k={}; for(const i of p.locked) k[i]=p.seats[i]; p.seats=k; } touch(p); render(); toast("Everyone's back in the list (Undo to bring them back)"); break;
       case "editroom": state.editRoom=!state.editRoom; state.lockMode=false; state.selected=null; render(); break;
       case "lockmode": state.lockMode=!state.lockMode; state.editRoom=false; state.selected=null; render(); break;
-      case "view": viewModal(); break;
       case "flip": state.flipped=!state.flipped; render(); break;
       case "print": window.print(); break;
       case "full": try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }catch(e){} break;
@@ -821,7 +862,7 @@ window.addEventListener("pointermove", e=>{
   if(!drag.started){
     if(Math.hypot(e.clientX-drag.x, e.clientY-drag.y) < 8) return;
     drag.started=true;
-    const g=document.createElement("div"); g.className="dragghost"; g.textContent=nameOf(plan(),drag.sid); document.body.appendChild(g); drag.ghost=g;
+    const g=document.createElement("div"); g.className="dragghost"; g.textContent=displayName(plan(),drag.sid); document.body.appendChild(g); drag.ghost=g;
     drag.el.classList.add("dragging"); state.selected=null;
     document.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel"));
   }
@@ -836,7 +877,7 @@ function endDrag(e, cancel){
   const d=drag; drag=null;
   if(!d.started) return;
   d.ghost.remove(); d.el.classList.remove("dragging"); d.hot && d.hot.classList.remove("hot");
-  justDragged=true; setTimeout(()=>justDragged=false, 50);
+  justDragged=true; setTimeout(()=>justDragged=false, 0);
   if(cancel || !d.hot) return;
   const p=plan();
   if(d.hot.classList.contains("tray")) unseat(p,d.sid);
